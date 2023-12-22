@@ -38,6 +38,9 @@ Source = "https://github.com/unknown/zapy"
 [tool.hatch.version]
 path = "src/zapy/__init__.py"
 
+[tool.hatch.build.targets.wheel]
+packages = ["src/zapy"]
+
 [tool.hatch.envs.default]
 dependencies = [
   "coverage[toml]>=6.5",
