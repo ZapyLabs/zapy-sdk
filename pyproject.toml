@@ -31,9 +31,10 @@ dependencies = [
 ]
 
 [project.urls]
-Documentation = "https://github.com/unknown/zapy#readme"
-Issues = "https://github.com/unknown/zapy/issues"
-Source = "https://github.com/unknown/zapy"
+Homepage = "https://zapy.dev"
+Documentation = "https://docs.zapy.dev"
+Issues = "https://github.com/ZapyLabs/zapy-sdk/issues"
+Source = "https://github.com/ZapyLabs/zapy-sdk"
 
 [tool.hatch.version]
 path = "src/zapy/__init__.py"
