@@ -1,6 +1,6 @@
-# Zapy REST client
+# Zapy REST client - SDK
 
-Zapy is a Rest API client based on Python technologies. It aims to solve the duplication issue on integration testing.
+Zapy REST Client is VSCode extension to test APIs. Zapy SDK the python library that allows the client to operate. It aims to solve the duplication issue on integration testing.
 
 ---
 

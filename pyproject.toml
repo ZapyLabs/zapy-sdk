@@ -5,7 +5,7 @@ build-backend = "hatchling.build"
 [project]
 name = "zapy-sdk"
 dynamic = ["version"]
-description = ''
+description = 'Zapy SDK for Zapy REST client'
 readme = "README.md"
 requires-python = ">=3.11"
 license = {file = "LICENSE.txt"}
