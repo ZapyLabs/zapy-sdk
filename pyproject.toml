@@ -3,7 +3,7 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
-name = "zapy"
+name = "zapy-sdk"
 dynamic = ["version"]
 description = ''
 readme = "README.md"

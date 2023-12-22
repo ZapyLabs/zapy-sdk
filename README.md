@@ -26,7 +26,7 @@ Zapy is a Rest API client based on Python technologies. It aims to solve the dup
 
 Install the python library under a virtual environment.
 
-```pip install zapydev```
+```pip install zapy-sdk```
 
 Install the VSCode Extension.
 Create a `.zapy` file, for example `my_first_request.zapy` and open it using VSCode.
