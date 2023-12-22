@@ -1,0 +1,52 @@
+{
+    "metadata": {
+        "cell_type": "zapy:request",
+        "v": "1"
+    },
+    "endpoint": "https://echo.hoppscotch.io/{{var1}}",
+    "name": "req",
+    "params": [
+        {
+            "key": "key1",
+            "value": "test_key_1",
+            "active": true
+        },
+        {
+            "key": "key2",
+            "value": "test_key_2",
+            "active": true
+        }
+    ],
+    "headers": [],
+    "variables": [
+        {
+            "key": "var1",
+            "value": "\"welcome\"",
+            "active": true
+        },
+        {
+            "key": "var2",
+            "value": "\"sadfd\"",
+            "active": true
+        }
+    ],
+    "method": "GET",
+    "script": [
+        "from zapy.ctx import hooks",
+        "",
+        "@hooks.pre_request",
+        "async def pre_request_example(context):",
+        "    print(\"pre_request\")",
+        "",
+        "",
+        "@hooks.post_request",
+        "async def test_response(context):",
+        "    ctx.store.foo = 'from_req_1'"
+    ],
+    "body_type": "application/json",
+    "body":  [
+        "{\n",
+            "hola: \"{{var2}}\"\n",
+        "}"
+    ]
+}
