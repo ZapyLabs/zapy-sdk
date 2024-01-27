@@ -6,6 +6,7 @@ async def empty_function(*args):
     else:
         return args
 
+
 def call_with_signature(function, *args, kwargs):
     import inspect
 
@@ -13,7 +14,7 @@ def call_with_signature(function, *args, kwargs):
     my_args = list(args)
     my_kwargs = dict()
     args_tuples = list(sig.parameters.items())
-    for k , v in args_tuples[len(my_args):]:
+    for k, v in args_tuples[len(my_args) :]:
         cls = v.annotation
         if inspect.Signature.empty == cls:
             raise ValueError(f"Undefined type for '{k}' argument on method '{function.__name__}'")

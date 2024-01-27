@@ -1,8 +1,9 @@
-import functools
 import asyncio
+import functools
 
-from zapy.base.exceptions import ZapyException, HandledException
+from zapy.base.exceptions import HandledException, ZapyException
 from zapy.templating.traceback import copy_traceback
+
 
 class RenderLocationException(ZapyException, HandledException):
 
@@ -19,18 +20,23 @@ class RenderLocationException(ZapyException, HandledException):
 def error_location(location: str):
     def decorator(function):
         if not asyncio.iscoroutinefunction(function):
+
             @functools.wraps(function)
             def wrapper(*args, **kwargs):
                 try:
                     return function(*args, **kwargs)
                 except Exception as ex:
                     raise RenderLocationException(ex, location)
+
         else:
+
             @functools.wraps(function)
             async def wrapper(*args, **kwargs):
                 try:
                     return await function(*args, **kwargs)
                 except Exception as ex:
                     raise RenderLocationException(ex, location)
+
         return wrapper
+
     return decorator

@@ -1,6 +1,7 @@
 from .exceptions import *
-from .requester import send_request, RequesterResponse
-from .models import ZapyRequest, KeyValueItem, HttpxArguments, Response as HttpxResponse
+from .models import HttpxArguments, KeyValueItem, ZapyRequest
+from .models import Response as HttpxResponse
+from .requester import RequesterResponse, send_request
 
 from_dict = ZapyRequest.from_dict
 from_path = ZapyRequest.from_path

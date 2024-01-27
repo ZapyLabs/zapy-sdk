@@ -8,10 +8,11 @@ class ServerConnection(BaseModel):
 
 # Copied from uvicorn
 
-from typing_extensions import TypedDict
+import asyncio
 import os
 import typing
-import asyncio
+
+from typing_extensions import TypedDict
 from uvicorn.config import (
     HTTPProtocolType,
     InterfaceType,
@@ -19,6 +20,7 @@ from uvicorn.config import (
     LoopSetupType,
     WSProtocolType,
 )
+
 
 class UvicornRunConfig(TypedDict):
     host: str
@@ -42,9 +44,7 @@ class UvicornRunConfig(TypedDict):
     reload_delay: float
     workers: typing.Optional[int]
     env_file: typing.Optional[typing.Union[str, os.PathLike]]
-    log_config: typing.Optional[
-        typing.Union[typing.Dict[str, typing.Any], str]
-    ]
+    log_config: typing.Optional[typing.Union[typing.Dict[str, typing.Any], str]]
     log_level: typing.Optional[typing.Union[str, int]]
     access_log: bool
     proxy_headers: bool

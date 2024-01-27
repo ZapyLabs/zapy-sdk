@@ -17,13 +17,12 @@ def test_info(client):
 
     assert response.status_code == 200
     actual = response.json()
-    assert actual['key'] == "zapy"
-    assert actual['application'] == "Zapy"
-    assert actual['version'] == "0.0.1a1"
-    assert actual['virtualEnv'] == True
-    assert actual['documentation'] == "https://docs.zapy.dev"
-    assert len(actual['sys_prefix']) > 0
-    assert len(actual['directory']) > 0
+    assert actual["key"] == "zapy"
+    assert actual["application"] == "Zapy"
+    assert actual["version"] == "0.0.1a1"
+    assert actual["virtualEnv"] == True
+    assert actual["documentation"] == "https://docs.zapy.dev"
+    assert len(actual["sys_prefix"]) > 0
+    assert len(actual["directory"]) > 0
     assert "current_time" in actual
     assert "start_time" in actual
-

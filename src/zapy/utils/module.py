@@ -1,7 +1,9 @@
-from pathlib import Path
 import importlib.util
+import io
+import sys
+import types
+from pathlib import Path
 from threading import Lock
-import io, sys, types
 
 from zapy.templating.eval import exec_async
 
@@ -11,8 +13,8 @@ def load_module(module_path: str | Path):
 
     if module_path.is_dir():
         return load_module_dir(module_path)
-    elif module_path.suffix == '.ipynb':
-        raise ValueError('use load_ipynb to load ipynb')
+    elif module_path.suffix == ".ipynb":
+        raise ValueError("use load_ipynb to load ipynb")
     else:
         return load_module_python(module_path)
 
@@ -23,7 +25,7 @@ def load_module_dir(module_path: str | Path):
     with Lock():
         sys.path.append(module_str)
         try:
-            return load_module_python(module_path / '__init__.py')
+            return load_module_python(module_path / "__init__.py")
         finally:
             sys.path.remove(module_str)
 
@@ -38,7 +40,7 @@ def load_module_python(module_path: str | Path):
 
 
 async def load_ipynb(module_path: str | Path, variables=None):
-    ''' from https://jupyter-notebook.readthedocs.io/en/latest/examples/Notebook/Importing%20Notebooks.html '''
+    """from https://jupyter-notebook.readthedocs.io/en/latest/examples/Notebook/Importing%20Notebooks.html"""
     from IPython import get_ipython
     from IPython.core.interactiveshell import InteractiveShell
     from nbformat import read
@@ -50,14 +52,14 @@ async def load_ipynb(module_path: str | Path, variables=None):
     variables = variables or dict()
 
     # load the notebook object
-    with io.open(module_path, 'r', encoding='utf-8') as f:
+    with open(module_path, encoding="utf-8") as f:
         nb = read(f, 4)
 
     # create the module and add it to sys.modules if name in sys.modules:
     #    return sys.modules[name]
     mod = types.ModuleType(fullname)
     mod.__file__ = module_path
-    mod.__dict__['get_ipython'] = get_ipython
+    mod.__dict__["get_ipython"] = get_ipython
     # apply parameters
     for k, v in variables.items():
         mod.__dict__[k] = v
@@ -69,7 +71,7 @@ async def load_ipynb(module_path: str | Path, variables=None):
 
     try:
         for cell in nb.cells:
-            if cell.cell_type == 'code':
+            if cell.cell_type == "code":
                 # transform the input to executable Python
                 code = shell.input_transformer_manager.transform_cell(cell.source)
                 # run the code in themodule

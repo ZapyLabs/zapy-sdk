@@ -1,5 +1,5 @@
-from typing import Callable
 from dataclasses import dataclass
+from typing import Callable
 from unittest import TestCase
 
 from zapy.utils.functools import empty_function
@@ -18,14 +18,14 @@ class RequestHookBlueprint:
         self.request_hook = RequestHook()
 
     def pre_request(self, func):
-        '''
+        """
         `pre_request` is a decorator used to intercept and modify `httpx` arguments **before** sending the request.
         This can be used globally or locally, under a request file.
 
         Read more about it in the
         [Zapy docs - Hooks](https://docs.zapy.dev/sdk/hooks/).
 
-        
+
         ## Example
 
         ```python
@@ -36,19 +36,19 @@ class RequestHookBlueprint:
             httpx_args['auth'] = ('alice', 'ecila123')
             print(httpx_args)
         ```
-        '''
+        """
         self.request_hook.pre_request = func
         return func
 
     def post_request(self, func):
-        '''
+        """
         `pre_request` is a decorator used to intercept and modify `httpx` arguments **after** sending the request.
         This can be used globally or locally, under a request file.
 
         Read more about it in the
         [Zapy docs - Hooks](https://docs.zapy.dev/sdk/hooks/).
 
-        
+
         ## Example
 
         ```python
@@ -58,7 +58,7 @@ class RequestHookBlueprint:
         async def after_each_request(httpx_response: HttpxResponse):
             print(httpx_response.data)
         ```
-        '''
+        """
         self.request_hook.post_request = func
         return func
 
@@ -68,8 +68,11 @@ class RequestHookBlueprint:
 
 
 _global_blueprint = RequestHookBlueprint()
+
+
 def use_global_hook():
     return _global_blueprint.request_hook
+
 
 pre_request = _global_blueprint.pre_request
 post_request = _global_blueprint.post_request

@@ -2,7 +2,6 @@ import ast
 
 from .traceback import annotate_traceback
 
-
 _python_code = """
 async def __exec_wrapper(_globs):
     globals().update(**_globs)
@@ -10,11 +9,14 @@ async def __exec_wrapper(_globs):
     return locals()
 """
 
+
 async def exec_async(custom_code: str, _globals: dict):
     parsed_ast = ast.parse(_python_code)
-    is_placeholder = lambda node: isinstance(node, ast.Expr) and \
-        isinstance(node.value, ast.Name) and \
-        node.value.id == "__placeholder"
+    is_placeholder = (
+        lambda node: isinstance(node, ast.Expr)
+        and isinstance(node.value, ast.Name)
+        and node.value.id == "__placeholder"
+    )
 
     for node in ast.walk(parsed_ast):
         if is_placeholder(node):
@@ -26,10 +28,10 @@ async def exec_async(custom_code: str, _globals: dict):
     exec(unparsed)
 
     try:
-        func = locals()['__exec_wrapper']
+        func = locals()["__exec_wrapper"]
         new_locals = await func(_globals)
     except BaseException as e:
-        annotate_traceback(e, unparsed, location='exec_async')
+        annotate_traceback(e, unparsed, location="exec_async")
         raise
 
     _globals.update(new_locals)
@@ -39,12 +41,13 @@ def exec_sync(custom_code: str, _globals: dict):
     try:
         return exec(custom_code, _globals)
     except BaseException as e:
-        annotate_traceback(e, custom_code, location='exec_sync')
+        annotate_traceback(e, custom_code, location="exec_sync")
         raise
+
 
 def eval_sync(custom_code: str, _globals: dict):
     try:
         return eval(custom_code, _globals)
     except BaseException as e:
-        annotate_traceback(e, custom_code, location='eval_sync')
+        annotate_traceback(e, custom_code, location="eval_sync")
         raise

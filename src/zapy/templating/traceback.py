@@ -1,10 +1,10 @@
 import sys
-import traceback
 import textwrap
-
-from zapy.utils.singleton import SingletonMeta
+import traceback
 
 from typing_extensions import TypedDict
+
+from zapy.utils.singleton import SingletonMeta
 
 
 class TracebackInfo(TypedDict):
@@ -17,11 +17,13 @@ class TracebackInfo(TypedDict):
 def annotate_traceback(exc_obj: BaseException, script="", location=""):
     traceback_info = TracebackHandler().extract(script, location)
     exc_obj._parse_errors = traceback_info
-    exc_obj.add_note(traceback_info['stacktrace'])
+    exc_obj.add_note(traceback_info["stacktrace"])
     return traceback_info
+
 
 def recover_traceback(exc_obj: BaseException):
     return getattr(exc_obj, "_parse_errors", None)
+
 
 def copy_traceback(exc_obj: BaseException, from_exc: BaseException):
     info = recover_traceback(from_exc)
@@ -42,23 +44,25 @@ class TracebackHandler(metaclass=SingletonMeta):
         else:
             return self.extract_from_error(exc_obj, location=location)
 
-    def extract_from_frame(self, frame_summary: traceback.FrameSummary, exc_obj, script='', location=''):
-        stacktrace = textwrap.dedent(f"""\
+    def extract_from_frame(self, frame_summary: traceback.FrameSummary, exc_obj, script="", location=""):
+        stacktrace = textwrap.dedent(
+            f"""\
             {self.header}
               {location}, line {frame_summary.lineno}, in {frame_summary.name}
                 {frame_summary.line or self.__extract_line(script, frame_summary.lineno)}
-            {exc_obj.__class__.__name__}: {exc_obj}""")
+            {exc_obj.__class__.__name__}: {exc_obj}"""
+        )
         return {
             "exception_type": exc_obj.__class__.__name__,
             "exception_message": str(exc_obj),
             "line": frame_summary.lineno,
             "stacktrace": stacktrace,
         }
-    
-    def extract_from_error(self, exc_obj, location=''):
+
+    def extract_from_error(self, exc_obj, location=""):
         tracelines = traceback.format_exception_only(exc_obj)
         tracelines[0] = tracelines[0].replace('File "<string>"', location)
-        tracelines.insert(0, self.header + '\n')
+        tracelines.insert(0, self.header + "\n")
         return {
             "exception_type": exc_obj.__class__.__name__,
             "exception_message": str(exc_obj),
@@ -68,10 +72,9 @@ class TracebackHandler(metaclass=SingletonMeta):
 
     def __extract_line(self, script: str, line: int):
         if not script:
-            return ''
+            return ""
         try:
-            script_lines = script.split('\n')
+            script_lines = script.split("\n")
             return script_lines[line - 1].strip()
         except Exception:
             return "<<Zapy: line omitted due to an error on extraction, check your line separation>>"
-

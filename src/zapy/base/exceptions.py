@@ -1,6 +1,7 @@
 class HandledException(Exception):
     pass
 
+
 class ZapyException(Exception):
     namespace: str
     identifier: str

@@ -1,13 +1,15 @@
 from __future__ import annotations
+
 from pathlib import Path
 
 from pydantic import BaseModel, Field
 
 from zapy.__init__ import __version__
-from zapy.base import ZapyCell, Metadata
-from zapy.test import assert_test_result_dict, AssertTestResultMixin
+from zapy.base import Metadata, ZapyCell
+from zapy.test import AssertTestResultMixin, assert_test_result_dict
 
 Code = list[str] | str
+
 
 class KeyValueItem(BaseModel):
     key: str
@@ -16,7 +18,7 @@ class KeyValueItem(BaseModel):
 
 
 class RequestMetadata(Metadata):
-    cell_type: str = 'zapy.ZapyRequest'
+    cell_type: str = "zapy.ZapyRequest"
     v: str = __version__
 
 
@@ -28,7 +30,7 @@ class ZapyRequest(BaseModel, ZapyCell):
     headers: list[KeyValueItem] = Field(default_factory=list)
     variables: list[KeyValueItem] = Field(default_factory=list)
     script: Code = ""
-    body_type: str = 'None'
+    body_type: str = "None"
     body: Code | list[KeyValueItem] | None = None
 
     @classmethod
@@ -38,6 +40,7 @@ class ZapyRequest(BaseModel, ZapyCell):
     @classmethod
     def from_path(cls, file_path: str | Path) -> ZapyRequest:
         import json
+
         with open(file_path) as f:
             loaded_json = json.load(f)
         return cls.from_dict(loaded_json)

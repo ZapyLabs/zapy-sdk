@@ -1,14 +1,12 @@
-import sys
-import platform
 import os
-
-from pydantic import BaseModel
-from fastapi import APIRouter, Request
-
+import platform
+import sys
 from datetime import datetime
 
-from zapy.__init__ import __version__
+from fastapi import APIRouter, Request
+from pydantic import BaseModel
 
+from zapy.__init__ import __version__
 
 api_server_v1 = APIRouter(tags=["v1"])
 

@@ -18,34 +18,34 @@ def test_store_empty(client):
 
     assert response.status_code == 200
     assert actual == {
-        'attributes': [],
-        'field_name': 'default',
-        'path': 'default',
-        'type_str': 'Store',
-        'value_repr': '{}'
+        "attributes": [],
+        "field_name": "default",
+        "path": "default",
+        "type_str": "Store",
+        "value_repr": "{}",
     }
+
 
 def test_store(client):
     store = use_store()
-    store.test_var1 = 'dummy'
+    store.test_var1 = "dummy"
 
     response = client.get("/v1/stores/default")
     actual = response.json()
-    
 
     assert response.status_code == 200
     assert actual == {
-        'attributes': [
+        "attributes": [
             {
-                'attributes': [],
-                'field_name': "'test_var1'",
-                'path': "default['test_var1']",
-                'type_str': 'str',
-                'value_repr': "'dummy'",
+                "attributes": [],
+                "field_name": "'test_var1'",
+                "path": "default['test_var1']",
+                "type_str": "str",
+                "value_repr": "'dummy'",
             }
         ],
-        'field_name': 'default',
-        'path': 'default',
-        'type_str': 'Store',
-        'value_repr': "{'test_var1': 'dummy'}"
+        "field_name": "default",
+        "path": "default",
+        "type_str": "Store",
+        "value_repr": "{'test_var1': 'dummy'}",
     }

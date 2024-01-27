@@ -11,4 +11,4 @@ class TestCase(unittest.TestCase):
 
     def assertBetween(self, x, lo, hi):
         if not (lo <= x <= hi):
-            raise AssertionError(f'{x} not between {lo} and {hi}')
+            raise AssertionError(f"{x} not between {lo} and {hi}")
