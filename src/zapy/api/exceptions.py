@@ -4,13 +4,13 @@ from fastapi import Request
 from fastapi.responses import JSONResponse
 from pydantic import ValidationError
 
-from zapy.base.exceptions import HandledException, ZapyException
+from zapy.base.exceptions import HandledError, ZapyError
 
 
-def global_error_handler(request: Request, exception: Exception):
+def global_error_handler(_: Request, exception: Exception):
     traceback.print_exc()
     status_code = getattr(exception, "status_code", 500)
-    if isinstance(exception, HandledException):
+    if isinstance(exception, HandledError):
         status_code = 400
     if isinstance(exception, ValidationError):
         status_code = 400
@@ -20,6 +20,6 @@ def global_error_handler(request: Request, exception: Exception):
         "class": exception.__class__.__name__,
         "error_type": getattr(exception, "error_type", "error:unhandled"),
     }
-    if isinstance(exception, ZapyException):
-        response.update({"class": "ZapyException", "context": exception.context})
+    if isinstance(exception, ZapyError):
+        response.update({"class": "ZapyError", "context": exception.context})
     return JSONResponse(response, status_code=status_code)

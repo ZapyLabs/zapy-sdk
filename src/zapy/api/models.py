@@ -1,17 +1,8 @@
-from pydantic import BaseModel
-
-
-class ServerConnection(BaseModel):
-    host: str
-    port: int
-
-
-# Copied from uvicorn
-
 import asyncio
 import os
 import typing
 
+from pydantic import BaseModel
 from typing_extensions import TypedDict
 from uvicorn.config import (
     HTTPProtocolType,
@@ -20,6 +11,14 @@ from uvicorn.config import (
     LoopSetupType,
     WSProtocolType,
 )
+
+
+class ServerConnection(BaseModel):
+    host: str
+    port: int
+
+
+# Copied from uvicorn
 
 
 class UvicornRunConfig(TypedDict):

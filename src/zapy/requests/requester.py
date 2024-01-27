@@ -13,7 +13,7 @@ from zapy.utils import functools
 
 from .context import ZapyRequestContext
 from .converter import RequestConverter
-from .exceptions import RenderLocationException, error_location
+from .exceptions import RenderLocationError, error_location
 from .hooks import use_global_hook
 from .models import HttpxArguments, ZapyRequest
 
@@ -52,7 +52,7 @@ class Requester:
         # Hook: post_request
         try:
             await self._invoke_hooks_post_request(response)
-        except RenderLocationException as ex:
+        except RenderLocationError as ex:
             ex.context["response"] = response
             raise
 
@@ -100,7 +100,7 @@ class Requester:
         return test_result
 
     def _split_parameters(self, httpx_args: HttpxArguments):
-        request_parameters, rest_parameters = dict(), dict()
+        request_parameters, rest_parameters = {}, {}
         for k, v in httpx_args.items():
             if k in _http_request_signature:
                 request_parameters[k] = v

@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import UTC, datetime
 
 import socketio
 from fastapi import APIRouter, FastAPI
@@ -8,7 +8,7 @@ from .deps.socketio import sio
 from .exceptions import global_error_handler
 
 app = FastAPI()
-app.state.application_start_time = datetime.now()
+app.state.application_start_time = datetime.now(tz=UTC)
 app.add_exception_handler(Exception, global_error_handler)
 
 app_v1 = APIRouter()

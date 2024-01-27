@@ -4,7 +4,7 @@ from zapy.templating import eval
 
 
 def test_exec_variable_declaration():
-    global_vars = dict()
+    global_vars = {}
     eval.exec_sync(
         """
 a = 3
@@ -29,7 +29,7 @@ c = [1]
 
 def test_exec_throws_error():
     with pytest.raises(ValueError) as exc_info:
-        global_vars = dict()
+        global_vars = {}
         eval.exec_sync(
             """
 raise ValueError("From exec")
@@ -41,7 +41,7 @@ raise ValueError("From exec")
 
 @pytest.mark.asyncio
 async def test_exec_async():
-    global_vars = dict()
+    global_vars = {}
     await eval.exec_async(
         """
 async def my_async_function():
@@ -56,7 +56,7 @@ a = await my_async_function()
 @pytest.mark.asyncio
 async def test_exec_async_error():
     with pytest.raises(ValueError) as exc_info:
-        global_vars = dict()
+        global_vars = {}
         await eval.exec_async(
             """
 async def my_async_function():

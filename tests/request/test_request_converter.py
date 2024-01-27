@@ -3,7 +3,7 @@ import unittest
 
 from zapy.requests.converter import RequestConverter
 from zapy.requests.models import KeyValueItem, ZapyRequest
-from zapy.requests.requester import Requester, ZapyRequestContext
+from zapy.requests.requester import ZapyRequestContext
 from zapy.store import use_store
 from zapy.store.manager import Store
 

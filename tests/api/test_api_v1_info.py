@@ -20,7 +20,7 @@ def test_info(client):
     assert actual["key"] == "zapy"
     assert actual["application"] == "Zapy"
     assert actual["version"] == "0.0.1a1"
-    assert actual["virtualEnv"] == True
+    assert actual["is_venv"] is True
     assert actual["documentation"] == "https://docs.zapy.dev"
     assert len(actual["sys_prefix"]) > 0
     assert len(actual["directory"]) > 0

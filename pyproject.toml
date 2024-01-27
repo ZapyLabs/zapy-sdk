@@ -142,11 +142,15 @@ unfixable = [
 known-first-party = ["zapy"]
 
 [tool.ruff.flake8-tidy-imports]
-ban-relative-imports = "all"
+ban-relative-imports = "parents"
 
 [tool.ruff.per-file-ignores]
 # Tests can use magic values, assertions, and relative imports
 "tests/**/*" = ["PLR2004", "S101", "TID252"]
+# disable unused imports for init
+"__init__.py" = ["F401"]
+# allow print for cli/shell
+"src/zapy/cli.py" = ["T201"]
 
 [tool.coverage.run]
 source_pkgs = ["zapy", "tests"]

@@ -15,8 +15,8 @@ def test_variable_with_pipe():
     actual = templating.evaluate(
         "{{var1 | var2}}",
         {
-            "var1": set([1, 2]),
-            "var2": set([1, 3]),
+            "var1": {1, 2},
+            "var2": {1, 3},
         },
     )
-    assert actual == set([1, 2, 3])
+    assert actual == {1, 2, 3}

@@ -12,7 +12,7 @@ from zapy.test import AssertTestResultMixin, assert_test_result_dict
 class TestScript(unittest.IsolatedAsyncioTestCase, AssertTestResultMixin):
 
     @mock.patch.object(httpx.AsyncClient, "send", return_value=httpx.Response(200))
-    async def test_print(self, mock_request):
+    async def test_print(self, _):
         zapy_request = ZapyRequest(
             endpoint="http://test/",
             method="GET",
@@ -62,7 +62,7 @@ class TestScript(unittest.IsolatedAsyncioTestCase, AssertTestResultMixin):
         self.assertEqual("http://test/?param1=0.3&X-custom=hello%20world", req.url)
 
     @mock.patch.object(httpx.AsyncClient, "send", return_value=httpx.Response(200, json={"id": "test-id"}))
-    async def test_post_request_hook(self, mock_request):
+    async def test_post_request_hook(self, _):
         from decimal import Decimal
 
         zapy_request = ZapyRequest(
@@ -93,7 +93,7 @@ class TestScript(unittest.IsolatedAsyncioTestCase, AssertTestResultMixin):
         self.assertEqual({"id": "test-id"}, response.json())
 
     @mock.patch.object(httpx.AsyncClient, "send", return_value=httpx.Response(200))
-    async def test_request_hook_order(self, mock_request):
+    async def test_request_hook_order(self, _):
         zapy_request = ZapyRequest(
             endpoint="http://test/",
             method="GET",
@@ -130,7 +130,7 @@ class TestScript(unittest.IsolatedAsyncioTestCase, AssertTestResultMixin):
         )
 
     @mock.patch.object(httpx.AsyncClient, "send", return_value=httpx.Response(200, json={"id": "test-id"}))
-    async def test_test_hook_fails(self, mock_request):
+    async def test_test_hook_fails(self, _):
         zapy_request = ZapyRequest(
             endpoint="http://test/",
             method="GET",
@@ -148,7 +148,7 @@ class TestScript(unittest.IsolatedAsyncioTestCase, AssertTestResultMixin):
             await zapy_request.send(logger=mock_print)
 
     @mock.patch.object(httpx.AsyncClient, "send", return_value=httpx.Response(200, json={"id": "test-id"}))
-    async def test_test_hook_passes(self, mock_request):
+    async def test_test_hook_passes(self, _):
         zapy_request = ZapyRequest(
             endpoint="http://test/",
             method="GET",
@@ -164,11 +164,11 @@ class TestScript(unittest.IsolatedAsyncioTestCase, AssertTestResultMixin):
         mock_print = mock.MagicMock()
         response_wrapper = await send_request(zapy_request, logger=mock_print)
 
-        self.assertZapyTestResults(response_wrapper.test_result)
+        self.assert_zapy_test_results(response_wrapper.test_result)
         assert_test_result_dict(response_wrapper.test_result)
 
     @mock.patch.object(httpx.AsyncClient, "send", return_value=httpx.Response(200))
-    async def test_hook_with_metadata(self, mock_request):
+    async def test_hook_with_metadata(self, _):
         zapy_request = ZapyRequest(
             metadata=RequestMetadata(tags=["meta_tag_1"]),
             endpoint="http://test/",

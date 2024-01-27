@@ -3,11 +3,10 @@ from typing import Annotated
 from fastapi import APIRouter, BackgroundTasks, Header
 from pydantic import BaseModel
 
-from zapy.requests.exceptions import RenderLocationException
+from zapy.api.deps.socketio import SocketIO
+from zapy.requests.exceptions import RenderLocationError
 from zapy.requests.models import ZapyRequest
 from zapy.requests.requester import RequesterResponse, TestResult, send_request
-
-from ..deps.socketio import SocketIO
 
 api_request_v1 = APIRouter(tags=["v1"])
 
@@ -20,7 +19,7 @@ class RequestExecResponse(BaseModel):
         return cls(
             content=content,
             content_type=response.headers.get("content-type"),
-            headers={k: v for k, v in response.headers.items()},
+            headers=dict(response.headers.items()),
             status=response.status_code,
             time=response.elapsed.total_seconds(),
             test_result=wrapper.test_result,
@@ -52,7 +51,7 @@ async def exec_cell(
         )
         response_dict = RequestExecResponse.from_wrapper(response_wrapper)
         return response_dict
-    except RenderLocationException as ex:
+    except RenderLocationError as ex:
         response = ex.context.get("response")
         if response:
             response_wrapper = RequesterResponse(response)

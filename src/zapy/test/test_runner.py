@@ -11,7 +11,7 @@ class TestResult(TextTestResult):
         super().__init__(*args, **kwargs)
         self.successes = []
 
-    def addSuccess(self, test):
+    def addSuccess(self, test):  # noqa: N802
         super().addSuccess(test)
         self.successes.append(test)
 

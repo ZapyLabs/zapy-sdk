@@ -9,7 +9,7 @@ from .eval import eval_sync
 
 def evaluate(value: str, variables: dict | None = None):
     if variables is None:
-        variables = dict()
+        variables = {}
     if _is_python(value):
         expression = _extract_expression(value)
         return eval_sync(expression, variables)
@@ -21,7 +21,7 @@ def render(source: str, variables: dict):
     def raise_helper(msg):
         raise Exception(msg)
 
-    jinja = Environment(undefined=StrictUndefined)
+    jinja = Environment(undefined=StrictUndefined, autoescape=False)  # noqa: S701
     jinja.globals["raise"] = raise_helper
     template = jinja.from_string(source)
     rendered_template = template.render(**variables)

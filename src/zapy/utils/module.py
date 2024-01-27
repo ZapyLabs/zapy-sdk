@@ -1,5 +1,4 @@
 import importlib.util
-import io
 import sys
 import types
 from pathlib import Path
@@ -14,7 +13,8 @@ def load_module(module_path: str | Path):
     if module_path.is_dir():
         return load_module_dir(module_path)
     elif module_path.suffix == ".ipynb":
-        raise ValueError("use load_ipynb to load ipynb")
+        err_msg = "use load_ipynb to load ipynb"
+        raise ValueError(err_msg)
     else:
         return load_module_python(module_path)
 
@@ -49,7 +49,7 @@ async def load_ipynb(module_path: str | Path, variables=None):
     shell = InteractiveShell.instance()
     fullname = module_path.stem
 
-    variables = variables or dict()
+    variables = variables or {}
 
     # load the notebook object
     with open(module_path, encoding="utf-8") as f:

@@ -66,7 +66,7 @@ class RequestConverter:
     def _convert_body_data(self, data_list: list[KeyValueItem]):
         data_list: list[KeyValueItem] = filter(lambda x: x.active and x.key.strip(), data_list)
         result_dict = defaultdict(list)
-        files = list()
+        files = []
         for param in data_list:
             value = self.__eval_var(param.value)
             if isinstance(value, ZapyFileInfo):
@@ -95,7 +95,7 @@ class RequestConverter:
 
     @error_location("headers")
     def _convert_headers(self, header_list: list[KeyValueItem], body_content_type=None) -> dict:
-        headers = dict()
+        headers = {}
         for x in header_list:
             key = x.key.strip()
             if not (x.active and key):
@@ -119,20 +119,20 @@ class RequestConverter:
         self.script = script
 
         module_context = build_context_module(self.ctx)
-        vars = {
+        ctx_vars = {
             "print": self.ctx.logger,
             "ctx": module_context,
         }
 
         if script is None or not script.strip():
-            return RequestHook(), vars
+            return RequestHook(), ctx_vars
 
         with Lock():
             sys.modules["zapy.ctx"] = module_context
-            exec_sync(script, vars)
+            exec_sync(script, ctx_vars)
         request_hook = module_context.hooks.request_hook
 
-        return request_hook, vars
+        return request_hook, ctx_vars
 
     def __eval_var(self, value):
         return evaluate(value, self.variables)
@@ -141,7 +141,7 @@ class RequestConverter:
         return render(source, self.variables)
 
     def __join_code(self, code):
-        if type(code) == str:
+        if isinstance(code, str):
             return code
         else:
             return "\n".join(code)

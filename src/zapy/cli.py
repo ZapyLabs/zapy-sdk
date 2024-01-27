@@ -24,23 +24,24 @@ class ZapyCLI:
         if not hasattr(self, args.command):
             print("Unrecognized command")
             parser.print_help()
-            exit(1)
+            sys.exit(1)
         # use dispatch pattern to invoke method with same name
         getattr(self, args.command)()
-        exit(0)
+        sys.exit(0)
 
     def start_server(self):
         parser = argparse.ArgumentParser(description="Start the zapy service")
-        args = parser.parse_args(sys.argv[2:])
+        _ = parser.parse_args(sys.argv[2:])
         from zapy.api.bootstrapper import start_server
 
         start_server()
 
     def connection(self):
         parser = argparse.ArgumentParser(description="Read or create connection")
-        args = parser.parse_args(sys.argv[2:])
+        _ = parser.parse_args(sys.argv[2:])
         from zapy.api import connection
 
         conn_config = connection.load_server_config()
 
+        # print the json config
         print(conn_config.model_dump_json())

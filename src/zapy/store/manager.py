@@ -1,7 +1,10 @@
+import logging
 from dataclasses import dataclass, field
 from typing import Callable, Literal
 
 import wrapt
+
+max_recursions = 100
 
 
 @dataclass
@@ -20,7 +23,7 @@ class StorageLog:
                 name_stack.append(instance._self_field_name)
             instance = instance._self_parent
             count += 1
-            if count > 100:
+            if count > max_recursions:
                 raise RecursionError
         return reversed(name_stack)
 
@@ -34,8 +37,8 @@ class Logger:
     tags: list | None = field(default_factory=list)
     _subscribers: list[Callable] = field(default_factory=list)
 
-    def log(self, type, instance, name):
-        log = StorageLog(type, instance, name)
+    def log(self, action_type, instance, name):
+        log = StorageLog(action_type, instance, name)
         for sub in self._subscribers:
             sub(log)
 
@@ -93,7 +96,7 @@ class Store(DictStorage):
         logger = Logger(modifier, tags=tags)
 
         def catch_log(log: StorageLog):
-            print(logger.modifier, logger.tags, log)
+            logging.debug(f"{logger.modifier} {logger.tags} {log}")
 
         logger.on_log(catch_log)
         return Proxy(self, logger)
