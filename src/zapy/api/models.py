@@ -6,9 +6,19 @@ class ServerConnection(BaseModel):
     port: int
 
 
+# Copied from uvicorn
 
-from uvicorn.main import *
 from typing_extensions import TypedDict
+import os
+import typing
+import asyncio
+from uvicorn.config import (
+    HTTPProtocolType,
+    InterfaceType,
+    LifespanType,
+    LoopSetupType,
+    WSProtocolType,
+)
 
 class UvicornRunConfig(TypedDict):
     host: str

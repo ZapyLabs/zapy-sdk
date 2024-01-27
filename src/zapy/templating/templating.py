@@ -2,21 +2,21 @@ import ast
 
 from jinja2 import Environment, StrictUndefined
 
-from .eval import sync_eval
+from .eval import eval_sync
 
 
 # internal use only
 
-def evaluate(value, variables: dict | None = None):
+def evaluate(value: str, variables: dict | None = None):
     if variables is None:
         variables = dict()
     if _is_python(value):
         expression = _extract_expression(value)
-        return sync_eval(expression, variables)
+        return eval_sync(expression, variables)
     else:
         return render(value, variables)
 
-def render(source, variables: dict):
+def render(source: str, variables: dict):
     def raise_helper(msg):
         raise Exception(msg)
     jinja = Environment(undefined=StrictUndefined)
@@ -25,7 +25,7 @@ def render(source, variables: dict):
     rendered_template = template.render(**variables)
     return rendered_template
 
-def _extract_expression(value):
+def _extract_expression(value: str):
     return value.removeprefix('{{').removesuffix('}}').strip()
 
 def _is_python(value: str):

@@ -35,16 +35,16 @@ async def exec_async(custom_code: str, _globals: dict):
     _globals.update(new_locals)
 
 
-def sync_exec(custom_code: str, _globals: dict):
+def exec_sync(custom_code: str, _globals: dict):
     try:
         return exec(custom_code, _globals)
     except BaseException as e:
-        annotate_traceback(e, custom_code, location='sync_exec')
+        annotate_traceback(e, custom_code, location='exec_sync')
         raise
 
-def sync_eval(custom_code: str, _globals: dict):
+def eval_sync(custom_code: str, _globals: dict):
     try:
         return eval(custom_code, _globals)
     except BaseException as e:
-        annotate_traceback(e, custom_code, location='sync_eval')
+        annotate_traceback(e, custom_code, location='eval_sync')
         raise

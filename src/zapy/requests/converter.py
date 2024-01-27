@@ -6,7 +6,7 @@ from collections import defaultdict
 
 from zapy.base import ZapyAuto
 from zapy.templating.templating import evaluate, render
-from zapy.templating.eval import sync_exec
+from zapy.templating.eval import exec_sync
 
 from .exceptions import error_location
 from .context import ZapyRequestContext, build_context_module
@@ -137,7 +137,7 @@ class RequestConverter:
 
         with Lock():
             sys.modules['zapy.ctx'] = module_context
-            sync_exec(script, vars)
+            exec_sync(script, vars)
         request_hook = module_context.hooks.request_hook
 
         return request_hook, vars

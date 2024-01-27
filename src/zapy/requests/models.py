@@ -56,6 +56,7 @@ class ZapyRequest(BaseModel, ZapyCell):
         return request_wrapper.response
 
 
+# Copied from httpx
 from httpx._client import *
 from typing_extensions import TypedDict
 
