@@ -38,4 +38,3 @@ class TestCase(unittest.TestCase):
         """This alias will be deprecated in preference of `assert_between`."""
         warnings.warn("Call to deprecated function assertBetween. Replace it with assert_between.", stacklevel=2)
         self.assert_between(x, lo, hi)
-        self.assertAlmostEqual()
