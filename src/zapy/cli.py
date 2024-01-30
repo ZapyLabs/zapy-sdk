@@ -21,13 +21,14 @@ class ZapyCLI:
         # parse_args defaults to [1:] for args, but you need to
         # exclude the rest of the args too, or validation will fail
         args = parser.parse_args(sys.argv[1:2])
-        if not hasattr(self, args.command):
+        if args.command is None or not hasattr(self, args.command):
             print("Unrecognized command")
             parser.print_help()
             sys.exit(1)
-        # use dispatch pattern to invoke method with same name
-        getattr(self, args.command)()
-        sys.exit(0)
+        else:
+            # use dispatch pattern to invoke method with same name
+            getattr(self, args.command)()
+            sys.exit(0)
 
     def start_server(self):
         parser = argparse.ArgumentParser(description="Start the zapy service")
