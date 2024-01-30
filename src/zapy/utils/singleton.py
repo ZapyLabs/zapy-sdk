@@ -1,4 +1,5 @@
 from threading import Lock
+from typing import ClassVar, Type
 
 
 class SingletonMeta(type):
@@ -6,7 +7,7 @@ class SingletonMeta(type):
     This is a thread-safe implementation of Singleton.
     """
 
-    _instances = {}
+    _instances: ClassVar[dict[Type["SingletonMeta"], "SingletonMeta"]] = {}
 
     _lock: Lock = Lock()
     """

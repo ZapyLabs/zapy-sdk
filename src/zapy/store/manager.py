@@ -1,12 +1,16 @@
+import logging
 from dataclasses import dataclass, field
-from typing import Literal, Callable
+from typing import Callable, Literal
+
 import wrapt
+
+max_recursions = 100
 
 
 @dataclass
 class StorageLog:
-    type: Literal['set', 'get']
-    instance: 'Proxy'
+    type: Literal["set", "get"]
+    instance: "Proxy"
     name: str
 
     @property
@@ -19,7 +23,7 @@ class StorageLog:
                 name_stack.append(instance._self_field_name)
             instance = instance._self_parent
             count += 1
-            if count > 100:
+            if count > max_recursions:
                 raise RecursionError
         return reversed(name_stack)
 
@@ -33,8 +37,8 @@ class Logger:
     tags: list | None = field(default_factory=list)
     _subscribers: list[Callable] = field(default_factory=list)
 
-    def log(self, type, instance, name):
-        log = StorageLog(type, instance, name)
+    def log(self, action_type, instance, name):
+        log = StorageLog(action_type, instance, name)
         for sub in self._subscribers:
             sub(log)
 
@@ -44,6 +48,7 @@ class Logger:
 
 class DictStorage(dict):
     """dot.notation access to dictionary attributes"""
+
     __getattr__ = dict.get
     __setattr__ = dict.__setitem__
     __delattr__ = dict.__delitem__
@@ -58,22 +63,22 @@ class Proxy(wrapt.ObjectProxy):
         self._self_field_name = field_name
 
     def __setattr__(self, name, value):
-        if not name.startswith('_self_'):
+        if not name.startswith("_self_"):
             logger = self._self_logger
-            logger.log('set', self, name)
+            logger.log("set", self, name)
         return super().__setattr__(name, value)
 
     def __getattr__(self, name: str):
         val = super().__getattr__(name)
-        if isinstance(val, Proxy) or name.startswith('_self_'):
+        if isinstance(val, Proxy) or name.startswith("_self_"):
             return val
         logger = self._self_logger
-        logger.log('get', self, name)
+        logger.log("get", self, name)
         return Proxy(val, logger, self, name)
 
     def __setitem__(self, key, value):
         logger = self._self_logger
-        logger.log('set', self, key)
+        logger.log("set", self, key)
         return super().__setitem__(key, value)
 
     def __getitem__(self, key):
@@ -81,16 +86,17 @@ class Proxy(wrapt.ObjectProxy):
         if isinstance(val, Proxy):
             return val
         logger = self._self_logger
-        logger.log('get', self, key)
+        logger.log("get", self, key)
         return Proxy(val, logger, self, key)
 
 
 class Store(DictStorage):
 
-    def create_usage(self, modifier, tags=None) -> 'Store':
+    def create_usage(self, modifier, tags=None) -> "Store":
         logger = Logger(modifier, tags=tags)
+
         def catch_log(log: StorageLog):
-            print(logger.modifier, logger.tags, log)
+            logging.debug(f"{logger.modifier} {logger.tags} {log}")
+
         logger.on_log(catch_log)
         return Proxy(self, logger)
-

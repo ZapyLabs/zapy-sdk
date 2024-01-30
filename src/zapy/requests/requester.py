@@ -1,27 +1,28 @@
-from typing import List
-from dataclasses import dataclass, field
-import inspect
 import asyncio
+import inspect
+from dataclasses import dataclass, field
+from typing import List
 
 import httpx
 
 from zapy.base import Metadata
-from zapy.test import run_tests, TestResult
 from zapy.store import Store, use_store
-from zapy.utils import functools
 from zapy.templating.traceback import annotate_traceback
+from zapy.test import TestResult, run_tests
+from zapy.utils import functools
 
-from .exceptions import error_location, RenderLocationException
-from .models import ZapyRequest, HttpxArguments
 from .context import ZapyRequestContext
-from .hooks import use_global_hook
 from .converter import RequestConverter
+from .exceptions import RenderLocationError, error_location
+from .hooks import use_global_hook
+from .models import HttpxArguments, ZapyRequest
 
 
 @dataclass
 class RequesterResponse:
     response: httpx.Response
     test_result: List[TestResult] = field(default_factory=list)
+
 
 _http_request_signature = inspect.signature(httpx.Client.build_request).parameters
 
@@ -51,7 +52,7 @@ class Requester:
         # Hook: post_request
         try:
             await self._invoke_hooks_post_request(response)
-        except RenderLocationException as ex:
+        except RenderLocationError as ex:
             ex.context["response"] = response
             raise
 
@@ -60,29 +61,29 @@ class Requester:
         # Hook: test
         if self.request_hooks.test:
             response_wrapper.test_result = self._run_test(
-                httpx_args = httpx_args,
-                request = request,
-                response = response,
+                httpx_args=httpx_args,
+                request=request,
+                response=response,
             )
 
         return response_wrapper
 
-    @error_location('pre_request')
+    @error_location("pre_request")
     async def _invoke_hooks_pre_request(self, httpx_args: dict):
         try:
             await self.__call_hook(use_global_hook().pre_request, httpx_args)
             await self.__call_hook(self.request_hooks.pre_request, httpx_args)
         except BaseException as e:
-            annotate_traceback(e, self.converter.script, location='hook')
+            annotate_traceback(e, self.converter.script, location="hook")
             raise e
 
-    @error_location('post_request')
+    @error_location("post_request")
     async def _invoke_hooks_post_request(self, response: httpx.Response):
         try:
             await self.__call_hook(use_global_hook().post_request, response)
             await self.__call_hook(self.request_hooks.post_request, response)
         except Exception as e:
-            annotate_traceback(e, self.converter.script, location='hook')
+            annotate_traceback(e, self.converter.script, location="hook")
             raise e
 
     def _run_test(self, **args) -> dict:
@@ -91,6 +92,7 @@ class Requester:
                 for k, v in args.items():
                     attrs[k] = v
                 return super().__new__(cls, name, bases, attrs)
+
         class DecoratedClass(self.request_hooks.test, metaclass=RequestMeta):
             pass
 
@@ -98,7 +100,7 @@ class Requester:
         return test_result
 
     def _split_parameters(self, httpx_args: HttpxArguments):
-        request_parameters, rest_parameters = dict(), dict()
+        request_parameters, rest_parameters = {}, {}
         for k, v in httpx_args.items():
             if k in _http_request_signature:
                 request_parameters[k] = v
@@ -116,12 +118,15 @@ class Requester:
     def request_hooks(self):
         return self.converter.request_hooks
 
-async def send_request(zapy_request: ZapyRequest, *, store: Store | None = None, logger=print, client: httpx.AsyncClient | None =None) -> RequesterResponse:
+
+async def send_request(
+    zapy_request: ZapyRequest, *, store: Store | None = None, logger=print, client: httpx.AsyncClient | None = None
+) -> RequesterResponse:
     if store is None:
         store = use_store()
     ctx = ZapyRequestContext(
-        store = store,
-        logger = logger,
+        store=store,
+        logger=logger,
     )
     _client = client or httpx.AsyncClient(follow_redirects=True, timeout=None)
     try:
@@ -130,6 +135,7 @@ async def send_request(zapy_request: ZapyRequest, *, store: Store | None = None,
     finally:
         if client is None:
             await _client.aclose()
+
 
 def build_request(zapy_request: ZapyRequest, ctx: ZapyRequestContext, client: httpx.AsyncClient) -> Requester:
     converter = RequestConverter(zapy_request, ctx)

@@ -1,7 +1,7 @@
 import unittest
 import unittest.case
-from unittest.runner import TextTestResult
 from typing import List
+from unittest.runner import TextTestResult
 
 from .models import TestResult
 
@@ -11,25 +11,34 @@ class TestResult(TextTestResult):
         super().__init__(*args, **kwargs)
         self.successes = []
 
-    def addSuccess(self, test):
+    def addSuccess(self, test):  # noqa: N802
         super().addSuccess(test)
         self.successes.append(test)
 
     def as_list(self) -> List[TestResult]:
-        successes = [{
+        successes = [
+            {
                 "method": test._testMethodName,
                 "status": "success",
-            } for test in self.successes]
-        errors = [{
+            }
+            for test in self.successes
+        ]
+        errors = [
+            {
                 "method": test._testMethodName,
                 "traceback": traceback_str,
                 "status": "error",
-            } for test, traceback_str in self.errors]
-        failures = [{
+            }
+            for test, traceback_str in self.errors
+        ]
+        failures = [
+            {
                 "method": test._testMethodName,
                 "traceback": traceback_str,
                 "status": "failure",
-            } for test, traceback_str in self.failures]
+            }
+            for test, traceback_str in self.failures
+        ]
         return successes + errors + failures
 
 

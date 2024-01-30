@@ -1,1 +1,1 @@
-import setup_store
+from . import setup_store

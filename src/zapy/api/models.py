@@ -1,4 +1,16 @@
+import asyncio
+import os
+import typing
+
 from pydantic import BaseModel
+from typing_extensions import TypedDict
+from uvicorn.config import (
+    HTTPProtocolType,
+    InterfaceType,
+    LifespanType,
+    LoopSetupType,
+    WSProtocolType,
+)
 
 
 class ServerConnection(BaseModel):
@@ -6,9 +18,8 @@ class ServerConnection(BaseModel):
     port: int
 
 
+# Copied from uvicorn
 
-from uvicorn.main import *
-from typing_extensions import TypedDict
 
 class UvicornRunConfig(TypedDict):
     host: str
@@ -32,9 +43,7 @@ class UvicornRunConfig(TypedDict):
     reload_delay: float
     workers: typing.Optional[int]
     env_file: typing.Optional[typing.Union[str, os.PathLike]]
-    log_config: typing.Optional[
-        typing.Union[typing.Dict[str, typing.Any], str]
-    ]
+    log_config: typing.Optional[typing.Union[typing.Dict[str, typing.Any], str]]
     log_level: typing.Optional[typing.Union[str, int]]
     access_log: bool
     proxy_headers: bool
