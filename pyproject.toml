@@ -21,7 +21,7 @@ classifiers = [
 ]
 dependencies = [
   "fastapi>0.95.0",
-  "uvicorn",
+  "uvicorn==0.*",
   "python-socketio[asyncio_client]",
   "pydantic==2.*",
   "httpx==0.*",
@@ -46,6 +46,7 @@ packages = ["src/zapy"]
 dependencies = [
   "coverage[toml]>=6.5",
   "pytest",
+  "pytest-asyncio",
   "nbformat",
   "ipython",
 ]
@@ -62,7 +63,7 @@ cov = [
 ]
 
 [[tool.hatch.envs.all.matrix]]
-python = ["3.9", "3.10", "3.11"]
+python = ["3.11"]
 
 [tool.hatch.envs.lint]
 detached = true
@@ -141,11 +142,15 @@ unfixable = [
 known-first-party = ["zapy"]
 
 [tool.ruff.flake8-tidy-imports]
-ban-relative-imports = "all"
+ban-relative-imports = "parents"
 
 [tool.ruff.per-file-ignores]
 # Tests can use magic values, assertions, and relative imports
 "tests/**/*" = ["PLR2004", "S101", "TID252"]
+# disable unused imports for init
+"__init__.py" = ["F401"]
+# allow print for cli/shell
+"src/zapy/cli.py" = ["T201"]
 
 [tool.coverage.run]
 source_pkgs = ["zapy", "tests"]
@@ -164,6 +169,9 @@ exclude_lines = [
   "no cov",
   "if __name__ == .__main__.:",
   "if TYPE_CHECKING:",
+]
+omit = [
+  "tests/*",
 ]
 fail_under = 80
 

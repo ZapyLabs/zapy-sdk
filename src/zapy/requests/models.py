@@ -1,13 +1,33 @@
 from __future__ import annotations
+
+import typing
 from pathlib import Path
 
+from httpx._client import (
+    AuthTypes,
+    CookieTypes,
+    HeaderTypes,
+    QueryParamTypes,
+    RequestContent,
+    RequestData,
+    RequestExtensions,
+    RequestFiles,
+    TimeoutTypes,
+    URLTypes,
+    UseClientDefault,
+)
+from httpx._client import (
+    Response as HttpxResponse,  # noqa: F401
+)
 from pydantic import BaseModel, Field
+from typing_extensions import TypedDict
 
 from zapy.__init__ import __version__
-from zapy.base import ZapyCell, Metadata
-from zapy.test import assert_test_result_dict, AssertTestResultMixin
+from zapy.base import Metadata, ZapyCell
+from zapy.test import AssertTestResultMixin, assert_test_result_dict
 
 Code = list[str] | str
+
 
 class KeyValueItem(BaseModel):
     key: str
@@ -16,7 +36,7 @@ class KeyValueItem(BaseModel):
 
 
 class RequestMetadata(Metadata):
-    cell_type: str = 'zapy.ZapyRequest'
+    cell_type: str = "zapy.ZapyRequest"
     v: str = __version__
 
 
@@ -28,7 +48,7 @@ class ZapyRequest(BaseModel, ZapyCell):
     headers: list[KeyValueItem] = Field(default_factory=list)
     variables: list[KeyValueItem] = Field(default_factory=list)
     script: Code = ""
-    body_type: str = 'None'
+    body_type: str = "None"
     body: Code | list[KeyValueItem] | None = None
 
     @classmethod
@@ -38,6 +58,7 @@ class ZapyRequest(BaseModel, ZapyCell):
     @classmethod
     def from_path(cls, file_path: str | Path) -> ZapyRequest:
         import json
+
         with open(file_path) as f:
             loaded_json = json.load(f)
         return cls.from_dict(loaded_json)
@@ -51,26 +72,25 @@ class ZapyRequest(BaseModel, ZapyCell):
             if raise_assert is True:
                 assert_test_result_dict(request_wrapper.test_result)
             elif isinstance(raise_assert, AssertTestResultMixin):
-                raise_assert.assertZapyTestResults(request_wrapper.test_result)
+                raise_assert.assert_zapy_test_results(request_wrapper.test_result)
 
         return request_wrapper.response
 
 
-from httpx._client import *
-from typing_extensions import TypedDict
+# Copied from httpx
 
 
 class HttpxArguments(TypedDict):
     method: str
     url: URLTypes
-    content: typing.Optional[RequestContent]
-    data: typing.Optional[RequestData]
-    files: typing.Optional[RequestFiles]
-    json: typing.Optional[typing.Any]
-    params: typing.Optional[QueryParamTypes]
-    headers: typing.Optional[HeaderTypes]
-    cookies: typing.Optional[CookieTypes]
-    auth: typing.Union[AuthTypes, UseClientDefault, None]
-    follow_redirects: typing.Union[bool, UseClientDefault]
-    timeout: typing.Union[TimeoutTypes, UseClientDefault]
-    extensions: typing.Optional[RequestExtensions]
+    content: RequestContent | None
+    data: RequestData | None
+    files: RequestFiles | None
+    json: typing.Any | None
+    params: QueryParamTypes | None
+    headers: HeaderTypes | None
+    cookies: CookieTypes | None
+    auth: AuthTypes | UseClientDefault | None
+    follow_redirects: bool | UseClientDefault
+    timeout: TimeoutTypes | UseClientDefault
+    extensions: RequestExtensions | None

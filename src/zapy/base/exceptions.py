@@ -1,14 +1,15 @@
-class HandledException(Exception):
+class HandledError(Exception):
     pass
 
-class ZapyException(Exception):
+
+class ZapyError(Exception):
     namespace: str
     identifier: str
     context: dict
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.context = dict()
+        self.context = {}
 
     @property
     def error_type(self):
