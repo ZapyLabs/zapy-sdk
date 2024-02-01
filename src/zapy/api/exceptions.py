@@ -7,18 +7,19 @@ from pydantic import ValidationError
 from zapy.base.exceptions import HandledError, ZapyError
 
 
-def global_error_handler(_: Request, exception: Exception):
+def global_error_handler(_: Request, exception: Exception) -> JSONResponse:
     traceback.print_exc()
     status_code = getattr(exception, "status_code", 500)
+    error_type = getattr(exception, "error_type", "error:unhandled")
     if isinstance(exception, HandledError):
         status_code = 400
     if isinstance(exception, ValidationError):
         status_code = 400
-        exception.error_type = "validation:json"
+        error_type = "validation:json"
     response = {
         "error": str(exception),
         "class": exception.__class__.__name__,
-        "error_type": getattr(exception, "error_type", "error:unhandled"),
+        "error_type": error_type,
     }
     if isinstance(exception, ZapyError):
         response.update({"class": "ZapyError", "context": exception.context})

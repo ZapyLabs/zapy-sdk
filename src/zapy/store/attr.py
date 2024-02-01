@@ -1,10 +1,12 @@
+from typing import Any
+
 from pydantic import BaseModel
 
 
 class Attr(BaseModel):
 
     @staticmethod
-    def create(path, field_name, attribute):
+    def create(path: str, field_name: str, attribute: Any) -> "Attr":
         return Attr(path=path, field_name=field_name, type_str=type(attribute).__name__, value_repr=repr(attribute))
 
     path: str
@@ -14,7 +16,7 @@ class Attr(BaseModel):
     attributes: list["Attr"] = []
 
 
-def build_attr_info(attr, path: str) -> Attr:
+def build_attr_info(attr: Any, path: str) -> Attr:
     attr_info = Attr.create(path, path, attribute=attr)
     for child_attr_name in dir(attr):
         if child_attr_name.startswith("__"):

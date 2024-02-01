@@ -1,13 +1,17 @@
+from __future__ import annotations
+
 from threading import Lock
-from typing import ClassVar, Type
+from typing import Any, Generic, TypeVar
+
+_T = TypeVar("_T")
 
 
-class SingletonMeta(type):
+class SingletonMeta(type, Generic[_T]):
     """
     This is a thread-safe implementation of Singleton.
     """
 
-    _instances: ClassVar[dict[Type["SingletonMeta"], "SingletonMeta"]] = {}
+    _instances: dict[SingletonMeta[_T], _T] = {}  # noqa: RUF012
 
     _lock: Lock = Lock()
     """
@@ -15,7 +19,7 @@ class SingletonMeta(type):
     first access to the Singleton.
     """
 
-    def __call__(cls, *args, **kwargs):
+    def __call__(cls, *args: Any, **kwargs: Any) -> _T:
         """
         Possible changes to the value of the `__init__` argument do not affect
         the returned instance.

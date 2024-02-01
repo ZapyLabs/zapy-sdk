@@ -1,4 +1,5 @@
 import ast
+from typing import Any
 
 from jinja2 import Environment, StrictUndefined
 
@@ -7,7 +8,7 @@ from .eval import eval_sync
 # internal use only
 
 
-def evaluate(value: str, variables: dict | None = None):
+def evaluate(value: str, variables: dict | None = None) -> Any | str:
     if variables is None:
         variables = {}
     if _is_python(value):
@@ -17,8 +18,8 @@ def evaluate(value: str, variables: dict | None = None):
         return render(value, variables)
 
 
-def render(source: str, variables: dict):
-    def raise_helper(msg):
+def render(source: str, variables: dict) -> str:
+    def raise_helper(msg: str) -> None:
         raise Exception(msg)
 
     jinja = Environment(undefined=StrictUndefined, autoescape=False)  # noqa: S701
@@ -28,11 +29,11 @@ def render(source: str, variables: dict):
     return rendered_template
 
 
-def _extract_expression(value: str):
+def _extract_expression(value: str) -> str:
     return value.removeprefix("{{").removesuffix("}}").strip()
 
 
-def _is_python(value: str):
+def _is_python(value: str) -> bool:
     if not (value.startswith("{{") and value.endswith("}}")):
         return False
     expression = _extract_expression(value)

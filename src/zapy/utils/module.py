@@ -3,11 +3,12 @@ import sys
 import types
 from pathlib import Path
 from threading import Lock
+from typing import Any
 
 from zapy.templating.eval import exec_async
 
 
-def load_module(module_path: str | Path):
+def load_module(module_path: str | Path) -> Any:
     module_path = Path(module_path)
 
     if module_path.is_dir():
@@ -19,7 +20,7 @@ def load_module(module_path: str | Path):
         return load_module_python(module_path)
 
 
-def load_module_dir(module_path: str | Path):
+def load_module_dir(module_path: str | Path) -> Any:
     module_path = Path(module_path)
     module_str = str(module_path)
     with Lock():
@@ -30,16 +31,19 @@ def load_module_dir(module_path: str | Path):
             sys.path.remove(module_str)
 
 
-def load_module_python(module_path: str | Path):
+def load_module_python(module_path: str | Path) -> Any:
     module_path = Path(module_path)
     module_spec = importlib.util.spec_from_file_location(module_path.stem, module_path)
+    if module_spec is None or module_spec.loader is None:
+        err_msg = "module spec is none"
+        raise ValueError(err_msg)
     module = importlib.util.module_from_spec(module_spec)
     module_spec.loader.exec_module(module)
 
     return module
 
 
-async def load_ipynb(module_path: str | Path, variables=None):
+async def load_ipynb(module_path: str | Path, variables: dict[str, Any] | None = None) -> Any:
     """from https://jupyter-notebook.readthedocs.io/en/latest/examples/Notebook/Importing%20Notebooks.html"""
     from IPython import get_ipython
     from IPython.core.interactiveshell import InteractiveShell
@@ -58,7 +62,7 @@ async def load_ipynb(module_path: str | Path, variables=None):
     # create the module and add it to sys.modules if name in sys.modules:
     #    return sys.modules[name]
     mod = types.ModuleType(fullname)
-    mod.__file__ = module_path
+    mod.__file__ = str(module_path)
     mod.__dict__["get_ipython"] = get_ipython
     # apply parameters
     for k, v in variables.items():

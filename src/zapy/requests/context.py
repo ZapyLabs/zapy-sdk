@@ -1,11 +1,12 @@
 from dataclasses import dataclass, field
+from pathlib import Path
 from types import ModuleType
 from typing import Callable
 
 from zapy.base import ZapyAuto
 from zapy.store import Store, use_store
 
-from .file_loader import load_file
+from .file_loader import ZapyFileInfo, load_file
 from .hooks import RequestHookBlueprint
 
 
@@ -16,10 +17,10 @@ class ZapyRequestContext:
     hooks: RequestHookBlueprint = field(default_factory=RequestHookBlueprint)
     logger: Callable = print
 
-    def load_file(self, path, mime=ZapyAuto):
+    def load_file(self, path: str | Path, mime: type[ZapyAuto] = ZapyAuto) -> ZapyFileInfo:
         return load_file(path, mime)
 
-    def auto(self):
+    def auto(self) -> type[ZapyAuto]:
         return ZapyAuto
 
 

@@ -1,7 +1,7 @@
 import asyncio
 import inspect
 from dataclasses import dataclass, field
-from typing import List
+from typing import Any, Callable, List
 
 import httpx
 
@@ -14,8 +14,8 @@ from zapy.utils import functools
 from .context import ZapyRequestContext
 from .converter import RequestConverter
 from .exceptions import RenderLocationError, error_location
-from .hooks import use_global_hook
-from .models import HttpxArguments, ZapyRequest
+from .hooks import RequestHook, use_global_hook
+from .models import HttpxArguments, HttpxResponse, ZapyRequest
 
 
 @dataclass
@@ -69,7 +69,7 @@ class Requester:
         return response_wrapper
 
     @error_location("pre_request")
-    async def _invoke_hooks_pre_request(self, httpx_args: dict):
+    async def _invoke_hooks_pre_request(self, httpx_args: HttpxArguments) -> None:
         try:
             await self.__call_hook(use_global_hook().pre_request, httpx_args)
             await self.__call_hook(self.request_hooks.pre_request, httpx_args)
@@ -78,7 +78,7 @@ class Requester:
             raise e
 
     @error_location("post_request")
-    async def _invoke_hooks_post_request(self, response: httpx.Response):
+    async def _invoke_hooks_post_request(self, response: httpx.Response) -> None:
         try:
             await self.__call_hook(use_global_hook().post_request, response)
             await self.__call_hook(self.request_hooks.post_request, response)
@@ -86,20 +86,26 @@ class Requester:
             annotate_traceback(e, self.converter.script, location="hook")
             raise e
 
-    def _run_test(self, **args) -> dict:
+    def _run_test(
+        self, httpx_args: HttpxArguments, request: httpx.Request, response: HttpxResponse
+    ) -> list[TestResult]:
+        if self.request_hooks.test is None:
+            return []
+
         class RequestMeta(type):
-            def __new__(cls, name, bases, attrs):
-                for k, v in args.items():
-                    attrs[k] = v
+            def __new__(cls, name: str, bases: tuple, attrs: dict) -> type:
+                attrs["httpx_args"] = httpx_args
+                attrs["request"] = request
+                attrs["response"] = response
                 return super().__new__(cls, name, bases, attrs)
 
-        class DecoratedClass(self.request_hooks.test, metaclass=RequestMeta):
+        class DecoratedClass(self.request_hooks.test, metaclass=RequestMeta):  # type: ignore[name-defined]
             pass
 
         test_result = run_tests(DecoratedClass).as_list()
         return test_result
 
-    def _split_parameters(self, httpx_args: HttpxArguments):
+    def _split_parameters(self, httpx_args: HttpxArguments) -> tuple[dict, dict]:
         request_parameters, rest_parameters = {}, {}
         for k, v in httpx_args.items():
             if k in _http_request_signature:
@@ -108,19 +114,23 @@ class Requester:
                 rest_parameters[k] = v
         return request_parameters, rest_parameters
 
-    async def __call_hook(self, hook, *args):
+    async def __call_hook(self, hook: Callable, *args: Any) -> Any:
         result = functools.call_with_signature(hook, *args, kwargs=self.__hook_context)
         if asyncio.iscoroutine(result):
             return await result
         return result
 
     @property
-    def request_hooks(self):
+    def request_hooks(self) -> RequestHook:
         return self.converter.request_hooks
 
 
 async def send_request(
-    zapy_request: ZapyRequest, *, store: Store | None = None, logger=print, client: httpx.AsyncClient | None = None
+    zapy_request: ZapyRequest,
+    *,
+    store: Store | None = None,
+    logger: Callable = print,
+    client: httpx.AsyncClient | None = None,
 ) -> RequesterResponse:
     if store is None:
         store = use_store()

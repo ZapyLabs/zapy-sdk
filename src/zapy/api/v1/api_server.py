@@ -6,7 +6,7 @@ from datetime import UTC, datetime
 from fastapi import APIRouter, Request
 from pydantic import BaseModel
 
-from zapy.__init__ import __version__
+from zapy.__about__ import __version__
 
 api_server_v1 = APIRouter(tags=["v1"])
 
@@ -32,8 +32,8 @@ async def server_info(request: Request) -> InfoModel:
         key="zapy",
         application="Zapy",
         version=__version__,
-        current_time=datetime.now(tz=UTC).isoformat(),
-        start_time=application_start_time.isoformat(),
+        current_time=datetime.now(tz=UTC),
+        start_time=application_start_time,
         running_time=(datetime.now(tz=UTC) - application_start_time).seconds,
         is_venv=sys.prefix != sys.base_prefix,
         sys_prefix=sys.prefix,

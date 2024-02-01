@@ -37,7 +37,7 @@ Issues = "https://github.com/ZapyLabs/zapy-sdk/issues"
 Source = "https://github.com/ZapyLabs/zapy-sdk"
 
 [tool.hatch.version]
-path = "src/zapy/__init__.py"
+path = "src/zapy/__about__.py"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/zapy"]
@@ -49,6 +49,7 @@ dependencies = [
   "pytest-asyncio",
   "nbformat",
   "ipython",
+  "mypy>=1.8.0",
 ]
 [tool.hatch.envs.default.scripts]
 test = "pytest {args:tests}"
@@ -61,6 +62,7 @@ cov = [
   "test-cov",
   "cov-report",
 ]
+check = "mypy --install-types --non-interactive {args:src/zapy}"
 
 [[tool.hatch.envs.all.matrix]]
 python = ["3.11"]
@@ -69,11 +71,9 @@ python = ["3.11"]
 detached = true
 dependencies = [
   "black>=23.1.0",
-  "mypy>=1.0.0",
   "ruff>=0.0.243",
 ]
 [tool.hatch.envs.lint.scripts]
-typing = "mypy --install-types --non-interactive {args:src/zapy tests}"
 style = [
   "ruff {args:.}",
   "black --check --diff {args:.}",
@@ -82,10 +82,6 @@ fmt = [
   "black {args:.}",
   "ruff --fix {args:.}",
   "style",
-]
-all = [
-  "style",
-  "typing",
 ]
 
 [tool.black]
@@ -152,6 +148,19 @@ ban-relative-imports = "parents"
 # allow print for cli/shell
 "src/zapy/cli.py" = ["T201"]
 
+[tool.mypy]
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
+
+[[tool.mypy.overrides]]
+module = [
+  "socketio",
+  "magicattr",
+  "wrapt",
+]
+ignore_missing_imports = true
+
 [tool.coverage.run]
 source_pkgs = ["zapy", "tests"]
 branch = true
@@ -173,6 +182,7 @@ exclude_lines = [
 omit = [
   "tests/*",
 ]
+fail_under = 80
 
 [project.scripts]
 zapy = "zapy.cli:ZapyCLI"

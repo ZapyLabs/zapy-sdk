@@ -3,27 +3,16 @@ from __future__ import annotations
 import typing
 from pathlib import Path
 
-from httpx._client import (
-    AuthTypes,
-    CookieTypes,
-    HeaderTypes,
-    QueryParamTypes,
-    RequestContent,
-    RequestData,
-    RequestExtensions,
-    RequestFiles,
-    TimeoutTypes,
-    URLTypes,
-    UseClientDefault,
-)
-from httpx._client import (
-    Response as HttpxResponse,  # noqa: F401
-)
+from httpx import _types as httpx_types
+from httpx._client import AsyncClient as HttpxAsyncClient
+from httpx._client import Response as HttpxResponse
+from httpx._client import UseClientDefault
 from pydantic import BaseModel, Field
 from typing_extensions import TypedDict
 
-from zapy.__init__ import __version__
+from zapy.__about__ import __version__
 from zapy.base import Metadata, ZapyCell
+from zapy.store import Store
 from zapy.test import AssertTestResultMixin, assert_test_result_dict
 
 Code = list[str] | str
@@ -40,6 +29,12 @@ class RequestMetadata(Metadata):
     v: str = __version__
 
 
+class RequestArguments(TypedDict, total=False):
+    store: Store | None
+    logger: typing.Callable
+    client: HttpxAsyncClient | None
+
+
 class ZapyRequest(BaseModel, ZapyCell):
     metadata: RequestMetadata = Field(default_factory=RequestMetadata)
     endpoint: str
@@ -52,7 +47,7 @@ class ZapyRequest(BaseModel, ZapyCell):
     body: Code | list[KeyValueItem] | None = None
 
     @classmethod
-    def from_dict(cls, value: dict) -> ZapyRequest:
+    def from_dict(cls, value: dict[str, typing.Any]) -> ZapyRequest:
         return cls.model_validate(value)
 
     @classmethod
@@ -60,13 +55,20 @@ class ZapyRequest(BaseModel, ZapyCell):
         import json
 
         with open(file_path) as f:
-            loaded_json = json.load(f)
+            loaded_json: dict = json.load(f)
         return cls.from_dict(loaded_json)
 
-    async def send(self, *, raise_assert: AssertTestResultMixin | bool = True, **kwargs):
+    async def send(
+        self,
+        *,
+        raise_assert: AssertTestResultMixin | bool = True,
+        store: Store | None = None,
+        logger: typing.Callable = print,
+        client: HttpxAsyncClient | None = None,
+    ) -> HttpxResponse:
         from .requester import send_request
 
-        request_wrapper = await send_request(self, **kwargs)
+        request_wrapper = await send_request(self, store=store, logger=logger, client=client)
 
         if request_wrapper.test_result:
             if raise_assert is True:
@@ -80,17 +82,17 @@ class ZapyRequest(BaseModel, ZapyCell):
 # Copied from httpx
 
 
-class HttpxArguments(TypedDict):
-    method: str
-    url: URLTypes
-    content: RequestContent | None
-    data: RequestData | None
-    files: RequestFiles | None
+class HttpxArguments(TypedDict, total=False):
+    method: typing.Required[str]
+    url: typing.Required[httpx_types.URLTypes]
+    content: httpx_types.RequestContent | None
+    data: httpx_types.RequestData | None
+    files: httpx_types.RequestFiles | None
     json: typing.Any | None
-    params: QueryParamTypes | None
-    headers: HeaderTypes | None
-    cookies: CookieTypes | None
-    auth: AuthTypes | UseClientDefault | None
+    params: httpx_types.QueryParamTypes
+    headers: httpx_types.HeaderTypes
+    cookies: httpx_types.CookieTypes
+    auth: httpx_types.AuthTypes | UseClientDefault
     follow_redirects: bool | UseClientDefault
-    timeout: TimeoutTypes | UseClientDefault
-    extensions: RequestExtensions | None
+    timeout: httpx_types.TimeoutTypes | UseClientDefault
+    extensions: httpx_types.RequestExtensions
