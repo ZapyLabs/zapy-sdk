@@ -6,7 +6,7 @@ from fastapi import Depends
 sio = socketio.AsyncServer(async_mode="asgi")
 
 
-def get_sio():
+def get_sio() -> socketio.AsyncServer:
     return sio
 
 

@@ -31,7 +31,11 @@ jobs:
     - name: Lint
       run: |
         # stop the build if lint does not pass
-        hatch run lint:all
+        hatch run lint:style
+    - name: Static type check
+      run: |
+        # stop the build if static check fails
+        hatch run check
     - name: Test and analyze coverage
       run: |
         hatch run cov

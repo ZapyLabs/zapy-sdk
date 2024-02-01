@@ -115,3 +115,5 @@ node_modules
 __pycache__
 .coverage
 .coverage.*
+
+.mypy_cache

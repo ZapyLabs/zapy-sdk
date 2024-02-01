@@ -1,10 +1,10 @@
-from typing import Annotated
+from typing import Annotated, Any, Self
 
 from fastapi import APIRouter, BackgroundTasks, Header
 from pydantic import BaseModel
 
 from zapy.api.deps.socketio import SocketIO
-from zapy.requests.exceptions import RenderLocationError
+from zapy.base.exceptions import ZapyError
 from zapy.requests.models import ZapyRequest
 from zapy.requests.requester import RequesterResponse, TestResult, send_request
 
@@ -13,7 +13,7 @@ api_request_v1 = APIRouter(tags=["v1"])
 
 class RequestExecResponse(BaseModel):
     @classmethod
-    def from_wrapper(cls, wrapper):
+    def from_wrapper(cls, wrapper: RequesterResponse) -> Self:
         response = wrapper.response
         content = response.text
         return cls(
@@ -40,7 +40,7 @@ async def exec_cell(
     zapy_request: ZapyRequest,
     x_request_id: Annotated[str | None, Header()] = None,
 ) -> RequestExecResponse:
-    def logger(*msg, sep=" ", end="\n"):
+    def logger(*msg: tuple[Any], sep: str = " ", end: str = "\n") -> None:
         log_message = sep.join(str(m) for m in msg) + end
         background_tasks.add_task(sio.emit, f"log:{x_request_id}", log_message)
 
@@ -49,9 +49,9 @@ async def exec_cell(
             zapy_request=zapy_request,
             logger=logger,
         )
-        response_dict = RequestExecResponse.from_wrapper(response_wrapper)
-        return response_dict
-    except RenderLocationError as ex:
+        response_exec = RequestExecResponse.from_wrapper(response_wrapper)
+        return response_exec
+    except ZapyError as ex:
         response = ex.context.get("response")
         if response:
             response_wrapper = RequesterResponse(response)

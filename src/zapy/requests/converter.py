@@ -1,7 +1,9 @@
 import itertools
 import sys
 from collections import defaultdict
+from io import BufferedReader
 from threading import Lock
+from typing import Any, Sequence, Tuple, TypedDict, cast
 
 from zapy.base import ZapyAuto
 from zapy.templating.eval import exec_sync
@@ -11,12 +13,25 @@ from .context import ZapyRequestContext, build_context_module
 from .exceptions import error_location
 from .file_loader import ZapyFileInfo
 from .hooks import RequestHook
-from .models import HttpxArguments, KeyValueItem, ZapyRequest
+from .models import Code, HttpxArguments, KeyValueItem, ZapyRequest, httpx_types
+
+HttpxFileTypes = httpx_types.FileTypes
+HttpxRequestFiles = httpx_types.RequestFiles
 
 FORM_TYPES = [
     "application/x-www-form-urlencoded",
     "multipart/form-data",
 ]
+
+FileInfo = tuple[str, BufferedReader, *tuple[str, ...]]
+HttpxFile = tuple[str, FileInfo]
+ParameterList = dict[str, list[str]]
+
+
+class RequestBodyArgs(TypedDict):
+    files: HttpxRequestFiles | None
+    data: ParameterList | None
+    content: str | None
 
 
 class RequestConverter:
@@ -47,34 +62,40 @@ class RequestConverter:
         return httpx_args
 
     @error_location("body")
-    def _build_httpx_args_body(self, body_type: str, body):
+    def _build_httpx_args_body(self, body_type: str, body: list[KeyValueItem] | Code | None) -> RequestBodyArgs:
         files, data, content = None, None, None
         if body is None or body_type == "None":
             data = None
         elif body_type in FORM_TYPES:
+            body = cast(list[KeyValueItem], body)
             data, files = self._convert_body_data(body)
         else:
+            body = cast(Code, body)
             _body_source = self.__join_code(body)
             content = self.__render(_body_source)
-        return {
-            "files": files,
-            "data": data,
-            "content": content,
-        }
+        return RequestBodyArgs(
+            files=files,
+            data=data,
+            content=content,
+        )
 
     @error_location("body")
-    def _convert_body_data(self, data_list: list[KeyValueItem]):
-        data_list: list[KeyValueItem] = filter(lambda x: x.active and x.key.strip(), data_list)
+    def _convert_body_data(
+        self, data_list: list[KeyValueItem]
+    ) -> tuple[ParameterList, Sequence[Tuple[str, HttpxFileTypes]]]:
+        active_params = filter(lambda x: x.active and x.key.strip(), data_list)
         result_dict = defaultdict(list)
-        files = []
-        for param in data_list:
+        files: list[Tuple[str, HttpxFileTypes]] = []
+        for param in active_params:
             value = self.__eval_var(param.value)
             if isinstance(value, ZapyFileInfo):
-                file_info = (
-                    value.file_name,
-                    open(value.file_location, mode="rb"),
-                    *([] if value.mime_type is ZapyAuto else [value.mime_type]),
-                )
+                name = value.file_name
+                file = open(value.file_location, mode="rb")
+                file_info: HttpxFileTypes
+                if value.mime_type is ZapyAuto:
+                    file_info = (name, file)
+                else:
+                    file_info = (name, file, str(value.mime_type))
                 files.append((param.key, file_info))
             else:
                 result_dict[param.key].append(str(value))
@@ -82,11 +103,11 @@ class RequestConverter:
         return dict(result_dict), files
 
     @error_location("url")
-    def _convert_url(self, endpoint) -> dict:
+    def _convert_url(self, endpoint: str) -> str:
         return self.__render(endpoint)
 
     @error_location("params")
-    def _convert_params(self, parameter_list: list[KeyValueItem]) -> dict:
+    def _convert_params(self, parameter_list: list[KeyValueItem]) -> ParameterList:
         active_params = filter(lambda x: x.active and x.key.strip(), parameter_list)
         groups = itertools.groupby(active_params, lambda x: x.key.strip())
         result_dict = {key: [self.__render(p.value) for p in params] for key, params in groups}
@@ -94,13 +115,13 @@ class RequestConverter:
         return result_dict
 
     @error_location("headers")
-    def _convert_headers(self, header_list: list[KeyValueItem], body_content_type=None) -> dict:
+    def _convert_headers(self, header_list: list[KeyValueItem], body_content_type: str | None = None) -> dict[str, str]:
         headers = {}
-        for x in header_list:
-            key = x.key.strip()
-            if not (x.active and key):
+        for kv_item in header_list:
+            key = kv_item.key.strip()
+            if not (kv_item.active and key):
                 continue
-            eval_var = self.__eval_var(x.value)
+            eval_var = self.__eval_var(kv_item.value)
             if key.lower() == "content-type" and eval_var == ZapyAuto:
                 if body_content_type not in ("None", "multipart/form-data"):
                     headers[key] = str(body_content_type)
@@ -110,7 +131,7 @@ class RequestConverter:
         return headers
 
     @error_location("variables")
-    def _convert_variables(self, variable_list: list[KeyValueItem]):
+    def _convert_variables(self, variable_list: list[KeyValueItem]) -> dict[str, Any | str]:
         return {x.key.strip(): self.__eval_var(x.value) for x in variable_list if x.active and x.key.strip()}
 
     @error_location("script")
@@ -134,13 +155,13 @@ class RequestConverter:
 
         return request_hook, ctx_vars
 
-    def __eval_var(self, value):
+    def __eval_var(self, value: str) -> Any | str:
         return evaluate(value, self.variables)
 
-    def __render(self, source):
+    def __render(self, source: str) -> str:
         return render(source, self.variables)
 
-    def __join_code(self, code):
+    def __join_code(self, code: Code) -> str:
         if isinstance(code, str):
             return code
         else:

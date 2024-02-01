@@ -9,15 +9,15 @@ from zapy.utils.functools import empty_function
 class RequestHook:
     pre_request: Callable = empty_function
     post_request: Callable = empty_function
-    test: TestCase | None = None
+    test: type[TestCase] | None = None
 
 
 class RequestHookBlueprint:
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.request_hook = RequestHook()
 
-    def pre_request(self, func):
+    def pre_request(self, func: Callable) -> Callable:
         """
         `pre_request` is a decorator used to intercept and modify `httpx` arguments **before** sending the request.
         This can be used globally or locally, under a request file.
@@ -40,7 +40,7 @@ class RequestHookBlueprint:
         self.request_hook.pre_request = func
         return func
 
-    def post_request(self, func):
+    def post_request(self, func: Callable) -> Callable:
         """
         `pre_request` is a decorator used to intercept and modify `httpx` arguments **after** sending the request.
         This can be used globally or locally, under a request file.
@@ -62,7 +62,7 @@ class RequestHookBlueprint:
         self.request_hook.post_request = func
         return func
 
-    def test(self, cls):
+    def test(self, cls: type[TestCase]) -> type[TestCase]:
         self.request_hook.test = cls
         return cls
 
@@ -70,7 +70,7 @@ class RequestHookBlueprint:
 _global_blueprint = RequestHookBlueprint()
 
 
-def use_global_hook():
+def use_global_hook() -> RequestHook:
     return _global_blueprint.request_hook
 
 

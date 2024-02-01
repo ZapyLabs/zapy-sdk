@@ -5,7 +5,7 @@ import textwrap
 
 class ZapyCLI:
 
-    def __init__(self):
+    def __init__(self) -> None:
         parser = argparse.ArgumentParser(
             description="Zapy CLI",
             usage=textwrap.dedent(
@@ -30,14 +30,14 @@ class ZapyCLI:
             getattr(self, args.command)()
             sys.exit(0)
 
-    def start_server(self):
+    def start_server(self) -> None:
         parser = argparse.ArgumentParser(description="Start the zapy service")
         _ = parser.parse_args(sys.argv[2:])
         from zapy.api.bootstrapper import start_server
 
         start_server()
 
-    def connection(self):
+    def connection(self) -> None:
         parser = argparse.ArgumentParser(description="Read or create connection")
         _ = parser.parse_args(sys.argv[2:])
         from zapy.api import connection

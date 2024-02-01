@@ -1,4 +1,5 @@
 import ast
+from typing import Any, cast
 
 from .traceback import annotate_traceback
 
@@ -10,16 +11,17 @@ async def __exec_wrapper(_globs):
 """
 
 
-async def exec_async(custom_code: str, _globals: dict):
+async def exec_async(custom_code: str, _globals: dict) -> None:
     parsed_ast = ast.parse(_python_code)
 
-    def is_placeholder(node):
+    def is_placeholder(node: ast.AST) -> bool:
         return isinstance(node, ast.Expr) and isinstance(node.value, ast.Name) and node.value.id == "__placeholder"
 
     for node in ast.walk(parsed_ast):
         if is_placeholder(node):
             custom_ast = ast.parse(custom_code)
-            new_node = custom_ast
+            node = cast(ast.Expr, node)
+            new_node = cast(ast.expr, custom_ast)
             node.value = new_node
 
     unparsed = ast.unparse(parsed_ast)
@@ -35,7 +37,7 @@ async def exec_async(custom_code: str, _globals: dict):
     _globals.update(new_locals)
 
 
-def exec_sync(custom_code: str, _globals: dict):
+def exec_sync(custom_code: str, _globals: dict) -> None:
     try:
         return exec(custom_code, _globals)  # noqa S102
     except BaseException as e:
@@ -43,7 +45,7 @@ def exec_sync(custom_code: str, _globals: dict):
         raise
 
 
-def eval_sync(custom_code: str, _globals: dict):
+def eval_sync(custom_code: str, _globals: dict) -> Any:
     try:
         return eval(custom_code, _globals)  # noqa S307
     except BaseException as e:

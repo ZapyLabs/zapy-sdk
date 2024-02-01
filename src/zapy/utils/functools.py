@@ -1,4 +1,7 @@
-async def empty_function(*args):
+from typing import Any, Callable
+
+
+async def empty_function(*args: tuple[Any]) -> Any | None:
     if len(args) == 0:
         return None
     elif len(args) == 1:
@@ -7,7 +10,7 @@ async def empty_function(*args):
         return args
 
 
-def call_with_signature(function, *args, kwargs):
+def call_with_signature(function: Callable, *args: tuple, kwargs: dict) -> Any:
     import inspect
 
     sig = inspect.signature(function)

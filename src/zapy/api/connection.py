@@ -2,6 +2,7 @@ import json
 import socket
 import sys
 from pathlib import Path
+from typing import cast
 
 from .models import ServerConnection
 
@@ -21,7 +22,7 @@ def load_server_config() -> ServerConnection:
     return conn
 
 
-def create_connection(conn_path) -> ServerConnection:
+def create_connection(conn_path: str | Path) -> ServerConnection:
     conn = ServerConnection(
         host="127.0.0.1",
         port=get_random_free_port(),
@@ -31,7 +32,7 @@ def create_connection(conn_path) -> ServerConnection:
     return conn
 
 
-def read_connection(conn_path) -> ServerConnection:
+def read_connection(conn_path: str | Path) -> ServerConnection:
     with open(conn_path) as outfile:
         raw_data = json.load(outfile)
         return ServerConnection.model_validate(raw_data)
@@ -42,4 +43,4 @@ def get_random_free_port() -> int:
     sock.bind(("", 0))
     port = sock.getsockname()[1]
     sock.close()
-    return port
+    return cast(int, port)
