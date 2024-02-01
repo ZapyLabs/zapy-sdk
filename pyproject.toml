@@ -37,7 +37,7 @@ Issues = "https://github.com/ZapyLabs/zapy-sdk/issues"
 Source = "https://github.com/ZapyLabs/zapy-sdk"
 
 [tool.hatch.version]
-path = "src/zapy/__init__.py"
+path = "src/zapy/__about__.py"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/zapy"]
