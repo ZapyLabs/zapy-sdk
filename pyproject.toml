@@ -14,9 +14,9 @@ authors = [
   { name = "zapy.dev" },
 ]
 classifiers = [
-    "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3 :: Only",
-    # Note: Python and license automatically added by some tools
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
     "Intended Audience :: Developers",
 ]
 dependencies = [

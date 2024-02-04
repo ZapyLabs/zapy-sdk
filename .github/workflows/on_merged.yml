@@ -1,0 +1,35 @@
+# This workflow will install Python dependencies, run tests and lint with a variety of Python versions
+# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-python
+
+name: After merge
+
+on:
+  push:
+    branches: [ "master" ]
+  pull_request:
+    branches: [ "master" ]
+    types:
+      - closed
+
+jobs:
+  coverage_badge:
+    if: github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v3
+        with:
+          python-version: "3.11"
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install hatch anybadge awscli
+      - name: Create coverage image
+        run: |
+          hatch run cov
+          cov_metric=$(hatch run coverage report --format=total)
+          anybadge --overwrite --label="🎯 coverage" --value=$cov_metric --file=coverage.svg
+      - name: Upload Coverage Badge
+        # do not upload using --key with .svg extension
+        run: |
+          aws s3api put-object --endpoint-url $AWS_ENDPOINT_URL --bucket zapy --key coverage --body coverage.svg --content-type image/svg+xml
