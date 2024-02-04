@@ -30,6 +30,8 @@ jobs:
           cov_metric=$(hatch run coverage report --format=total)
           anybadge --overwrite --label="🎯 coverage" --value=$cov_metric --file=coverage.svg
       - name: Upload Coverage Badge
+        env:
+          AWS_ENDPOINT_URL: ${{ secrets.AWS_ENDPOINT_URL }}
         # do not upload using --key with .svg extension
         run: |
           aws s3api put-object --endpoint-url $AWS_ENDPOINT_URL --bucket zapy --key coverage --body coverage.svg --content-type image/svg+xml
