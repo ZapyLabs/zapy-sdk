@@ -32,6 +32,8 @@ jobs:
       - name: Upload Coverage Badge
         env:
           AWS_ENDPOINT_URL: ${{ secrets.AWS_ENDPOINT_URL }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         # do not upload using --key with .svg extension
         run: |
           aws s3api put-object --endpoint-url $AWS_ENDPOINT_URL --bucket zapy --key coverage --body coverage.svg --content-type image/svg+xml
