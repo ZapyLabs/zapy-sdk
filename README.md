@@ -1,15 +1,28 @@
-<div style="display: flex;">
-    <div>
-        <a href="https://docs.zapy.dev">
-            <img src="https://docs.zapy.dev/assets/core/zapy_logo.svg" alt="zapy_logo" style="width: 100px;">
-        </a>
-    </div>
-    <div style="display: flex; flex-direction: column; justify-content: center;">
-        <div style="font-size: 24pt;">Zapy</div>
-    </div>
+<div>
+    <a href="https://docs.zapy.dev">
+        <img src="https://docs.zapy.dev/assets/core/zapy_logo_wide_alpha.svg" alt="zapy_logo" style="width: 250px;">
+    </a>
 </div>
 
 _The pythonic REST client and testing tool._
+
+<p>
+<a href="https://github.com/ZapyLabs/zapy-sdk/actions/workflows/python-publish.yml/badge.svg" target="_blank">
+    <img src="https://github.com/ZapyLabs/zapy-sdk/actions/workflows/python-publish.yml/badge.svg" alt="Test">
+</a>
+<a href="https://media.zapy.dev/coverage.svg" target="_blank">
+    <img src="https://media.zapy.dev/coverage" alt="Coverage">
+</a>
+<a href="https://pypi.org/project/zapy-sdk" target="_blank">
+    <img src="https://img.shields.io/badge/%F0%9F%9A%80%20release-alpha-yellow" alt="Version">
+</a>
+<a href="https://pypi.org/project/zapy-sdk" target="_blank">
+    <img src="https://img.shields.io/pypi/v/zapy-sdk?label=package&logo=pypi&logoColor=f5f5f5" alt="Package version">
+</a>
+<a href="https://pypi.org/project/zapy-sdk" target="_blank">
+    <img src="https://img.shields.io/pypi/pyversions/zapy-sdk?logo=python&logoColor=f5f5f5" alt="Supported Python versions">
+</a>
+</p>
 
 # Zapy REST Client - SDK
 
