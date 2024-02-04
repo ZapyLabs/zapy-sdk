@@ -32,8 +32,6 @@ jobs:
         hatch run cov
   lint:
     # lint uses the oldest version
-    needs: test
-    if: needs.test.outputs.status == 'success'
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
