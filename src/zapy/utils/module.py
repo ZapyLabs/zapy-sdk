@@ -1,37 +1,12 @@
 import importlib.util
-import sys
 import types
 from pathlib import Path
-from threading import Lock
 from typing import Any
 
 from zapy.templating.eval import exec_async
 
 
-def load_module(module_path: str | Path) -> Any:
-    module_path = Path(module_path)
-
-    if module_path.is_dir():
-        return load_module_dir(module_path)
-    elif module_path.suffix == ".ipynb":
-        err_msg = "use load_ipynb to load ipynb"
-        raise ValueError(err_msg)
-    else:
-        return load_module_python(module_path)
-
-
-def load_module_dir(module_path: str | Path) -> Any:
-    module_path = Path(module_path)
-    module_str = str(module_path)
-    with Lock():
-        sys.path.append(module_str)
-        try:
-            return load_module_python(module_path / "__init__.py")
-        finally:
-            sys.path.remove(module_str)
-
-
-def load_module_python(module_path: str | Path) -> Any:
+async def load_python(module_path: str | Path) -> Any:
     module_path = Path(module_path)
     module_spec = importlib.util.spec_from_file_location(module_path.stem, module_path)
     if module_spec is None or module_spec.loader is None:
@@ -59,8 +34,7 @@ async def load_ipynb(module_path: str | Path, variables: dict[str, Any] | None =
     with open(module_path, encoding="utf-8") as f:
         nb = read(f, 4)
 
-    # create the module and add it to sys.modules if name in sys.modules:
-    #    return sys.modules[name]
+    # create the module and add it to sys.modules
     mod = types.ModuleType(fullname)
     mod.__file__ = str(module_path)
     mod.__dict__["get_ipython"] = get_ipython
@@ -78,7 +52,7 @@ async def load_ipynb(module_path: str | Path, variables: dict[str, Any] | None =
             if cell.cell_type == "code":
                 # transform the input to executable Python
                 code = shell.input_transformer_manager.transform_cell(cell.source)
-                # run the code in themodule
+                # run the code in the module
                 await exec_async(code, mod.__dict__)
     finally:
         shell.user_ns = save_user_ns

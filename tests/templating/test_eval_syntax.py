@@ -25,6 +25,22 @@ def test_templating_brackets_not_closed():
         _ = templating.evaluate("{{ var }")
 
 
+@pytest.mark.parametrize(
+    "value,expected",
+    [
+        ("{{ {{ 1 }} }}", True),
+        ("{{ {{ 1 }} }} ", False),
+        ("{{ 1 }}", True),
+        ("{{var1}}{{(var2)}}", False),
+        ("1", False),
+        ("{#jinja#}{{var1 | upper}}", False),
+    ],
+)
+def test_templating_is_python(value, expected):
+    actual = templating._is_python(value)
+    assert actual is expected
+
+
 def test_variable_names_with_spaces_throws_error():
     with pytest.raises(SyntaxError):
         _ = templating.evaluate(

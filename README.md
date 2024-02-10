@@ -10,8 +10,8 @@ _The pythonic REST client and testing tool._
 <a href="https://github.com/ZapyLabs/zapy-sdk/actions/workflows/python-publish.yml/badge.svg" target="_blank">
     <img src="https://github.com/ZapyLabs/zapy-sdk/actions/workflows/python-publish.yml/badge.svg" alt="Test">
 </a>
-<a href="https://media.zapy.dev/coverage.svg" target="_blank">
-    <img src="https://media.zapy.dev/coverage" alt="Coverage">
+<a href="https://media.zapy.dev/htmlcov/index.html" target="_blank">
+    <img src="https://media.zapy.dev/coverage-badge" alt="Coverage">
 </a>
 <a href="https://pypi.org/project/zapy-sdk" target="_blank">
     <img src="https://img.shields.io/badge/%F0%9F%9A%80%20release-alpha-yellow" alt="Version">

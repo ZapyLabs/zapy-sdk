@@ -39,7 +39,7 @@ class TracebackHandler(metaclass=SingletonMeta):
     header = "Traceback (most recent call last):"
 
     def extract(self, script: str = "", location: str = "") -> TracebackInfo:
-        exc_type, exc_obj, exc_tb = sys.exc_info()
+        _, exc_obj, exc_tb = sys.exc_info()
         frame_summary = traceback.extract_tb(exc_tb)[-1]
         if exc_obj is None:
             err_msg = "Exception is None"

@@ -1,3 +1,5 @@
+import sys
+from pathlib import Path
 from unittest.mock import mock_open, patch
 
 import pytest
@@ -48,3 +50,17 @@ def test_load_server_config(mock_server_connection):
         connection = load_server_config()
         assert connection.host == "127.0.0.1"
         assert connection.port == 8080
+
+
+def test_load_server_config_file_exists():
+    with (
+        patch("zapy.api.connection.Path.exists") as mock_exists,
+        patch("zapy.api.connection.read_connection") as mock_read_connection,
+    ):
+        mock_exists.return_value = True
+        mock_read_connection.return_value = "Mocked connection"
+
+        config = load_server_config()
+
+        assert config == "Mocked connection"
+        mock_read_connection.assert_called_once_with(Path(sys.prefix) / "etc" / "zapy" / "connection.json")
