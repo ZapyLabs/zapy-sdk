@@ -6,8 +6,6 @@ from zapy.base import ZapyAuto
 
 @dataclass
 class ZapyFileInfo:
-    """Class for keeping track of an item in inventory."""
-
     file_location: Path
     mime_type: str | type[ZapyAuto]
     file_name: str

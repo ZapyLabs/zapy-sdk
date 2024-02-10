@@ -13,7 +13,7 @@ from typing_extensions import TypedDict
 from zapy.__about__ import __version__
 from zapy.base import Metadata, ZapyCell
 from zapy.store import Store
-from zapy.test import AssertTestResultMixin, assert_test_result_dict
+from zapy.test import assert_test_result_dict
 
 Code = list[str] | str
 
@@ -61,7 +61,7 @@ class ZapyRequest(BaseModel, ZapyCell):
     async def send(
         self,
         *,
-        raise_assert: AssertTestResultMixin | bool = True,
+        raise_assert: bool = True,
         store: Store | None = None,
         logger: typing.Callable = print,
         client: HttpxAsyncClient | None = None,
@@ -70,11 +70,8 @@ class ZapyRequest(BaseModel, ZapyCell):
 
         request_wrapper = await send_request(self, store=store, logger=logger, client=client)
 
-        if request_wrapper.test_result:
-            if raise_assert is True:
-                assert_test_result_dict(request_wrapper.test_result)
-            elif isinstance(raise_assert, AssertTestResultMixin):
-                raise_assert.assert_zapy_test_results(request_wrapper.test_result)
+        if request_wrapper.test_result and raise_assert is True:
+            assert_test_result_dict(request_wrapper.test_result)
 
         return request_wrapper.response
 

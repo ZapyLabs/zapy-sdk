@@ -3,7 +3,7 @@ from unittest import mock
 
 import httpx
 
-from zapy.requests import send_request
+from zapy.requests import RenderLocationError, send_request
 from zapy.requests.models import KeyValueItem, RequestMetadata, ZapyRequest
 from zapy.store.manager import Store
 from zapy.test import AssertTestResultMixin, assert_test_result_dict
@@ -60,6 +60,50 @@ class TestScript(unittest.IsolatedAsyncioTestCase, AssertTestResultMixin):
         mock_print.assert_called_with("pre_request")
         (req,) = mock_request.call_args.args
         self.assertEqual("http://test/?param1=0.3&X-custom=hello%20world", req.url)
+
+    @mock.patch.object(httpx.AsyncClient, "send", return_value=httpx.Response(200))
+    async def test_pre_request_hook_error(self, _):
+        zapy_request = ZapyRequest(
+            endpoint="http://test/",
+            method="GET",
+            params=[
+                KeyValueItem(key="param1", value="{{ 0.3 }}", active=True),
+            ],
+            script=[
+                "@ctx.hooks.pre_request",
+                "async def on_pre_request(request_args):",
+                '    raise ValueError("MockError")',
+            ],
+        )
+
+        store = Store()
+        mock_print = mock.MagicMock()
+
+        with self.assertRaises(RenderLocationError) as context:
+            await zapy_request.send(store=store, logger=mock_print)
+        self.assertEqual("Error on pre_request", str(context.exception))
+
+    @mock.patch.object(httpx.AsyncClient, "send", return_value=httpx.Response(200))
+    async def test_post_request_hook_error(self, _):
+        zapy_request = ZapyRequest(
+            endpoint="http://test/",
+            method="GET",
+            params=[
+                KeyValueItem(key="param1", value="{{ 0.3 }}", active=True),
+            ],
+            script=[
+                "@ctx.hooks.post_request",
+                "async def on_post_request(request_args):",
+                '    raise ValueError("MockError")',
+            ],
+        )
+
+        store = Store()
+        mock_print = mock.MagicMock()
+
+        with self.assertRaises(RenderLocationError) as context:
+            await zapy_request.send(store=store, logger=mock_print)
+        self.assertEqual("Error on post_request", str(context.exception))
 
     @mock.patch.object(httpx.AsyncClient, "send", return_value=httpx.Response(200, json={"id": "test-id"}))
     async def test_post_request_hook(self, _):
@@ -166,6 +210,30 @@ class TestScript(unittest.IsolatedAsyncioTestCase, AssertTestResultMixin):
 
         self.assert_zapy_test_results(response_wrapper.test_result)
         assert_test_result_dict(response_wrapper.test_result)
+
+    @mock.patch.object(httpx.AsyncClient, "send", return_value=httpx.Response(200, json={"id": "test-id"}))
+    async def test_hook_calls_deprecated(self, _):
+        zapy_request = ZapyRequest(
+            endpoint="http://test/",
+            method="GET",
+            script=[
+                "import unittest",
+                "@ctx.hooks.test",
+                "class TestStringMethods(unittest.TestCase):",
+                "    def test_response(self):",
+                '        self.assertEqual({"id": "test-id"}, self.response.json())',
+            ],
+        )
+
+        mock_print = mock.MagicMock()
+        response_wrapper = await send_request(zapy_request, logger=mock_print)
+
+        with mock.patch("warnings.warn") as mock_warn:
+            self.assertZapyTestResults(response_wrapper.test_result)
+            mock_warn.assert_called_once_with(
+                "Call to deprecated function assertZapyTestResults. Replace it with assert_zapy_test_results.",
+                stacklevel=2,
+            )
 
     @mock.patch.object(httpx.AsyncClient, "send", return_value=httpx.Response(200))
     async def test_hook_with_metadata(self, _):

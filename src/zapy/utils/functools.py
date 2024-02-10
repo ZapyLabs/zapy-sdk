@@ -23,7 +23,7 @@ def call_with_signature(function: Callable, *args: tuple, kwargs: dict) -> Any:
             err_msg = f"Undefined type for '{k}' argument on method '{function.__name__}'"
             raise ValueError(err_msg)
         if cls not in kwargs:
-            err_msg = f"Invalid type of {cls} for argument '{k}' on method '{function.__name__}'"
+            err_msg = f"Missing type of {cls} for argument '{k}' on method '{function.__name__}'"
             raise ValueError(err_msg)
         value = kwargs.get(cls)
         my_kwargs[k] = value

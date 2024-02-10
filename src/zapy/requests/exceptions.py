@@ -2,8 +2,6 @@ import asyncio
 import functools
 from typing import Any, Callable, TypedDict, TypeVar, cast
 
-from typing_extensions import ParamSpec
-
 from zapy.base.exceptions import HandledError, ZapyError
 from zapy.templating.traceback import TracebackInfo, copy_traceback
 
@@ -27,10 +25,6 @@ class RenderLocationError(ZapyError, HandledError):
         if info:
             self.context["stacktrace"] = info
 
-
-P = ParamSpec("P")
-R = TypeVar("R")
-# F = TypeVar("F", bound=Callable[P, R])
 
 T = TypeVar("T", bound=Callable[..., Any])
 

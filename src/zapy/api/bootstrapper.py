@@ -14,7 +14,7 @@ def start_server(options: UvicornRunConfig | None = None) -> NoReturn:
 
     server_config = load_server_config()
 
-    uvicorn_config = cast(UvicornRunConfig, server_config.dict() | options)
+    uvicorn_config = cast(UvicornRunConfig, server_config.model_dump() | options)
 
     uvicorn.run("zapy.api.server:server", **uvicorn_config)
     sys.exit(0)

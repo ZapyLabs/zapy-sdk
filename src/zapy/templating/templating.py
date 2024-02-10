@@ -19,11 +19,7 @@ def evaluate(value: str, variables: dict | None = None) -> Any | str:
 
 
 def render(source: str, variables: dict) -> str:
-    def raise_helper(msg: str) -> None:
-        raise Exception(msg)
-
     jinja = Environment(undefined=StrictUndefined, autoescape=False)  # noqa: S701
-    jinja.globals["raise"] = raise_helper
     template = jinja.from_string(source)
     rendered_template = template.render(**variables)
     return rendered_template
